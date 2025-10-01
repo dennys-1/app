@@ -1,0 +1,13 @@
+@model TiendaPc.Models.Pedido
+@{
+  ViewData["Title"] = "Pedido confirmado";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="bg-white rounded-xl shadow p-6 text-center">
+  <h1 class="text-2xl font-semibold mb-2">¡Gracias por tu compra!</h1>
+  <p class="text-gray-700">Tu pedido <b>@Model.NumeroPedido</b> ha sido creado.</p>
+  <p class="text-gray-700 mt-2">Total: <b>S/ @Model.Total.ToString("0.00")</b></p>
+  <div class="mt-4">
+    <a href="/Catalogo/Index" class="px-4 py-2 rounded bg-black text-white">Seguir comprando</a>
+  </div>
+</div>

@@ -1,0 +1,156 @@
+@*
+  Layout principal para TiendaPC
+  - Header responsive con logo, navegación, buscador y enlace a Admin
+  - Botón Catálogo destacado
+  - Pie con info breve
+  - Soporta secciones @RenderSection("Scripts", required: false)
+*@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>@(ViewData["Title"] != null ? $"{ViewData["Title"]} - TiendaPC" : "TiendaPC")</title>
+  <meta name="color-scheme" content="light only" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-3 3v-3H6a2 2 0 0 1-2-2z'/%3E%3C/svg%3E" />
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Pequeños ajustes */
+    .container { max-width: 1120px; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <!-- Header -->
+  <header class="bg-white border-b">
+    <div class="container mx-auto px-4">
+      <div class="flex items-center justify-between py-3 gap-3">
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+          <a href="/" class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-xl bg-black text-white grid place-items-center font-bold">PC</div>
+            <span class="text-xl font-bold">TiendaPC</span>
+          </a>
+        </div>
+
+        <!-- Buscador (desktop) -->
+        <form method="get" action="/Catalogo/Index" class="hidden md:block flex-1 max-w-2xl">
+          <div class="relative">
+            <input name="q" placeholder="Buscar CPUs, GPUs, Monitores…" class="w-full border rounded-xl px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-gray-200" />
+            <button class="absolute right-1 top-1.5 px-3 py-1.5 rounded-lg bg-black text-white text-sm">Buscar</button>
+          </div>
+          <a class="text-sm hover:underline" href="/Ofertas">Ofertas</a>
+        </form>
+
+        <!-- CTA / enlaces -->
+        <nav class="hidden md:flex items-center gap-4">
+          <a class="text-sm hover:underline" href="/">Inicio</a>
+          <a class="text-sm hover:underline" href="/Catalogo/Index">Catálogo</a>
+          <a class="text-sm hover:underline" href="/Carrito">Carrito</a>
+          <a class="text-sm text-gray-600 hover:underline" href="/Admin/Compras">Admin</a>
+        </nav>
+
+        <!-- Botón móvil -->
+        <button id="btnMobile" class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border">
+          <span class="sr-only">Abrir menú</span>
+          <!-- ícono hamburguesa -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Buscador + menú móvil -->
+      <div id="mobileMenu" class="md:hidden hidden pb-3">
+  <form method="get" action="/Catalogo/Index" class="mb-3">
+    <input name="q" placeholder="Buscar…" class="w-full border rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-200" />
+  </form>
+  <nav class="flex flex-col gap-2">
+    <a class="px-3 py-2 rounded-lg hover:bg-gray-100" href="/">Inicio</a>
+    <a class="px-3 py-2 rounded-lg hover:bg-gray-100" href="/Catalogo/Index">Catálogo</a>
+    <a class="px-3 py-2 rounded-lg hover:bg-gray-100" href="/Carrito">Carrito</a>
+    <a class="px-3 py-2 rounded-lg hover:bg-gray-100" href="/Ofertas">Ofertas</a>
+    <a class="px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-600" href="/Admin/Compras">Admin</a>
+
+ @if (User?.Identity?.IsAuthenticated ?? false)
+{
+  <span class="text-sm text-gray-600">Hola, @User.Identity!.Name</span>
+  <form method="post" action="/Cuenta/Logout" class="inline">
+    @Html.AntiForgeryToken()
+    <button class="text-sm hover:underline">Salir</button>
+  </form>
+  <a class="text-sm hover:underline" href="/MisPedidos">Mis pedidos</a>
+}
+else
+{
+  <a class="text-sm hover:underline" href="/Cuenta/Login">Ingresar</a>
+  <a class="text-sm hover:underline" href="/Cuenta/Registro">Crear cuenta</a>
+}
+
+    }
+    else
+    {
+      <a class="px-3 py-2 rounded-lg hover:bg-gray-100" href="/Identity/Account/Login">Ingresar</a>
+      <a class="px-3 py-2 rounded-lg hover:bg-gray-100" href="/Identity/Account/Register">Crear cuenta</a>
+    }
+  </nav>
+</div>
+
+    </div>
+  </header>
+
+  <!-- Subnav (promos) -->
+  <div class="bg-black text-white">
+    <div class="container mx-auto px-4 py-2 text-center text-sm">
+      ✨ <b>Semana Gamer:</b> GPUs y monitores con precio web. <a class="underline" href="/Catalogo/Index">Ver catálogo</a>
+    </div>
+  </div>
+
+  <!-- Contenido -->
+  <main class="container mx-auto px-4 py-6">
+    @RenderBody()
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t">
+    <div class="container mx-auto px-4 py-8 grid gap-6 md:grid-cols-3 text-sm">
+      <div>
+        <div class="font-semibold mb-2">TiendaPC</div>
+        <p class="text-gray-600">Componentes, PCs armadas y monitores. Atención en todo el Perú.</p>
+      </div>
+      <div>
+        <div class="font-semibold mb-2">Enlaces</div>
+        <ul class="space-y-1">
+          <li><a class="hover:underline" href="/">Inicio</a></li>
+          <li><a class="hover:underline" href="/Catalogo/Index">Catálogo</a></li>
+          <li><a class="hover:underline" href="/Carrito">Carrito</a></li>
+          <li><a class="hover:underline" href="/Admin/Compras">Admin</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="font-semibold mb-2">Contacto</div>
+        <ul class="space-y-1 text-gray-600">
+          <li>Arequipa, Perú</li>
+          <li>WhatsApp: +51 986 328 179</li>
+          <li>Email: ventas@innova-tecnologias.com</li>
+        </ul>
+      </div>
+    </div>
+    <div class="text-center text-xs text-gray-500 pb-6">© @DateTime.Now.Year TiendaPC</div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Toggle menú móvil
+    (function(){
+      const btn = document.getElementById('btnMobile');
+      const menu = document.getElementById('mobileMenu');
+      if(btn && menu){
+        btn.addEventListener('click', ()=> menu.classList.toggle('hidden'));
+      }
+    })();
+  </script>
+
+  @RenderSection("Scripts", required: false)
+</body>
+</html>

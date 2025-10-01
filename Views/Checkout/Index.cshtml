@@ -1,0 +1,46 @@
+@model TiendaPc.Controllers.CheckoutVm
+@{
+  ViewData["Title"] = "Checkout";
+  Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<h1 class="text-2xl font-semibold mb-4">Checkout</h1>
+
+<div class="grid md:grid-cols-[1fr_320px] gap-6">
+  <div class="bg-white rounded-xl shadow overflow-x-auto">
+    <table class="w-full">
+      <thead class="text-left">
+        <tr class="border-b">
+          <th class="p-3">Producto</th>
+          <th class="p-3">SKU</th>
+          <th class="p-3">Cant.</th>
+          <th class="p-3">Precio</th>
+          <th class="p-3">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        @foreach (var x in Model.Items)
+        {
+          <tr class="border-t">
+            <td class="p-3">@x.Nombre</td>
+            <td class="p-3">@x.Sku</td>
+            <td class="p-3">@x.Cantidad</td>
+            <td class="p-3">S/ @x.PrecioUnitario.ToString("0.00")</td>
+            <td class="p-3">S/ @x.Total.ToString("0.00")</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bg-white rounded-xl shadow p-4 h-max">
+    <div class="flex justify-between"><span>Subtotal</span><b>S/ @Model.Subtotal.ToString("0.00")</b></div>
+    <div class="flex justify-between"><span>IGV (18%)</span><b>S/ @Model.Igv.ToString("0.00")</b></div>
+    <div class="flex justify-between text-lg mt-2"><span>Total</span><b>S/ @Model.Total.ToString("0.00")</b></div>
+
+    <form method="post" action="/Checkout/Confirmar" class="mt-4">
+      @Html.AntiForgeryToken()
+      <button class="w-full px-4 py-2 rounded bg-black text-white">Confirmar pedido</button>
+    </form>
+    <a href="/Carrito" class="block text-center mt-3 text-sm text-gray-600 hover:underline">Volver al carrito</a>
+  </div>
+</div>

@@ -1,0 +1,84 @@
+@model dynamic
+@{
+  Layout = "~/Views/Shared/_Layout.cshtml";
+  var vm = (TiendaPc.Controllers.HomeVm)Model;
+}
+
+<!-- HERO -->
+<section class="bg-gray-900 text-white rounded-2xl p-8 mb-8 flex flex-col md:flex-row items-center justify-between">
+  <div>
+    <h1 class="text-3xl md:text-4xl font-bold mb-3">Ofertas de la semana</h1>
+    <p class="text-gray-200 mb-5">GPUs, CPUs y Monitores con precios web por tiempo limitado.</p>
+    <a href="/Catalogo/Index" class="inline-block bg-white text-gray-900 px-5 py-3 rounded-xl font-semibold">
+      Ver catálogo
+    </a>
+  </div>
+  <div class="mt-6 md:mt-0">
+    <div class="w-64 h-36 bg-gray-800 rounded-xl flex items-center justify-center">
+      <span class="opacity-70">Banner</span>
+    </div>
+  </div>
+</section>
+
+<!-- PROMOS ACTIVAS -->
+@if (vm.Promos.Count > 0) {
+<section class="mb-10">
+  <div class="flex items-baseline justify-between mb-3">
+    <h2 class="text-xl font-semibold">Promociones activas</h2>
+    <a href="/Catalogo/Index" class="text-sm text-gray-600 hover:underline">Ver todo</a>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+  @foreach (var p in vm.Promos) {
+    var finIso = p.Fin.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ");
+    <div class="bg-white rounded-xl shadow p-4">
+      <div class="h-36 bg-gray-100 rounded mb-2 flex items-center justify-center">IMG</div>
+      <a class="font-medium hover:underline" href="/producto/@p.IdProducto">@p.Nombre</a>
+      <div class="text-xs text-gray-500">SKU: @p.Sku</div>
+      <div class="mt-2">
+        <div class="text-sm line-through text-gray-400">S/ @p.PrecioNormal.ToString("0.00")</div>
+        <div class="text-2xl font-bold">S/ @p.PrecioWeb.ToString("0.00")</div>
+      </div>
+      <div class="mt-2 text-xs text-gray-600">
+        Finaliza en: <span class="font-semibold" data-countdown="@finIso"></span>
+      </div>
+      <a class="mt-3 inline-block px-3 py-2 bg-black text-white rounded" href="/producto/@p.IdProducto">Ver detalle</a>
+    </div>
+  }
+  </div>
+</section>
+}
+
+<!-- MARCAS -->
+<section>
+  <h2 class="text-xl font-semibold mb-3">Marcas</h2>
+  <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+    @foreach (var m in vm.Marcas) {
+      <a href="/Catalogo/Index?marca=@m.IdMarca" class="bg-white rounded-xl shadow p-4 text-center hover:ring-2 ring-gray-200">
+        <div class="mx-auto w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold">
+          @m.Nombre.Substring(0, Math.Min(3, m.Nombre.Length)).ToUpper()
+        </div>
+        <div class="mt-2 text-sm">@m.Nombre</div>
+      </a>
+    }
+  </div>
+</section>
+
+@section Scripts{
+<script>
+  // Countdowns simples
+  function updateCountdowns(){
+    document.querySelectorAll('[data-countdown]').forEach(el=>{
+      const end = new Date(el.getAttribute('data-countdown')).getTime();
+      const now = Date.now();
+      const diff = Math.max(0, end - now);
+      const d = Math.floor(diff / (1000*60*60*24));
+      const h = Math.floor((diff / (1000*60*60)) % 24);
+      const m = Math.floor((diff / (1000*60)) % 60);
+      const s = Math.floor((diff / 1000) % 60);
+      el.textContent = `${d}d ${h}h ${m}m ${s}s`;
+    });
+  }
+  updateCountdowns();
+  setInterval(updateCountdowns, 1000);
+</script>
+}

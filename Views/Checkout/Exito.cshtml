@@ -3,11 +3,42 @@
   ViewData["Title"] = "Pedido confirmado";
   Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<div class="bg-white rounded-xl shadow p-6 text-center">
-  <h1 class="text-2xl font-semibold mb-2">¡Gracias por tu compra!</h1>
-  <p class="text-gray-700">Tu pedido <b>@Model.NumeroPedido</b> ha sido creado.</p>
-  <p class="text-gray-700 mt-2">Total: <b>S/ @Model.Total.ToString("0.00")</b></p>
-  <div class="mt-4">
+
+<div class="max-w-2xl mx-auto bg-white rounded-xl shadow p-6 text-center">
+  <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 13 4 4L19 7"/>
+    </svg>
+  </div>
+
+  <h1 class="text-2xl font-semibold">¡Gracias por tu compra!</h1>
+  <p class="text-gray-700 mt-1">
+    Tu pedido <b>@(string.IsNullOrWhiteSpace(Model.NumeroPedido) ? $"P{Model.IdPedido:D6}" : Model.NumeroPedido)</b> fue creado correctamente.
+  </p>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 text-left">
+    <div class="bg-gray-50 rounded-lg p-4">
+      <div class="text-xs text-gray-500">N° de pedido</div>
+      <div class="font-semibold">
+        @(string.IsNullOrWhiteSpace(Model.NumeroPedido) ? $"P{Model.IdPedido:D6}" : Model.NumeroPedido)
+      </div>
+    </div>
+    <div class="bg-gray-50 rounded-lg p-4">
+      <div class="text-xs text-gray-500">Estado</div>
+      <div class="font-semibold">@Model.Estado</div>
+    </div>
+    <div class="bg-gray-50 rounded-lg p-4">
+      <div class="text-xs text-gray-500">Total</div>
+      <div class="font-semibold">S/ @Model.Total.ToString("0.00")</div>
+    </div>
+  </div>
+
+  <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+    <a href="/MisPedidos" class="px-4 py-2 rounded border">Ver mis pedidos</a>
     <a href="/Catalogo/Index" class="px-4 py-2 rounded bg-black text-white">Seguir comprando</a>
   </div>
+
+  <p class="mt-6 text-xs text-gray-500">
+    Recibirás un correo con el detalle de tu compra (opcional si luego agregamos notificaciones).
+  </p>
 </div>

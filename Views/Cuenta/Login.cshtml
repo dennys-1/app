@@ -5,38 +5,40 @@
 }
 <div class="max-w-md mx-auto bg-white rounded-xl shadow p-6">
   <h1 class="text-2xl font-semibold mb-4">Ingresar</h1>
+
   <form method="post" action="/Cuenta/Login">
     @Html.AntiForgeryToken()
     <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+
     <div class="mb-3">
       <label class="block text-sm font-medium">Email</label>
-      <input asp-for="Email" class="w-full border rounded px-3 py-2" />
-      <span asp-validation-for="Email" class="text-red-600 text-sm"></span>
+      <input type="email" name="Email" value="@Model.Email" class="w-full border rounded px-3 py-2" required />
     </div>
+
     <div class="mb-3">
       <label class="block text-sm font-medium">Contraseña</label>
-      <input asp-for="Password" class="w-full border rounded px-3 py-2" />
-      <span asp-validation-for="Password" class="text-red-600 text-sm"></span>
+      <input type="password" name="Password" class="w-full border rounded px-3 py-2" required />
     </div>
+
     <div class="mb-4">
       <label class="inline-flex items-center gap-2 text-sm">
-        <input asp-for="RememberMe" type="checkbox" />
+        <input type="checkbox" name="RememberMe" value="true" checked />
         <span>Recordarme</span>
       </label>
     </div>
+
     @if(!ViewData.ModelState.IsValid)
     {
       <div class="text-red-600 text-sm mb-2">
         @foreach (var e in ViewData.ModelState.Values.SelectMany(v=>v.Errors)) { <div>@e.ErrorMessage</div> }
       </div>
     }
+
     <button class="w-full px-4 py-2 rounded bg-black text-white">Ingresar</button>
   </form>
+
   <div class="text-sm text-center mt-3">
-    ¿No tienes cuenta? <a class="underline" href="/Cuenta/Registro@(string.IsNullOrWhiteSpace(Model.ReturnUrl) ? "" : $"?returnUrl={Uri.EscapeDataString(Model.ReturnUrl!)}")">Crear cuenta</a>
+    ¿No tienes cuenta?
+    <a class="underline" href="/Cuenta/Registro@(string.IsNullOrWhiteSpace(Model.ReturnUrl) ? "" : $"?returnUrl={Uri.EscapeDataString(Model.ReturnUrl!)}")">Crear cuenta</a>
   </div>
 </div>
-
-@section Scripts{
-  <partial name="_ValidationScriptsPartial" />
-}

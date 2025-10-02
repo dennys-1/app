@@ -103,3 +103,4 @@ C:\Users\DENNYS\Documents\sistema\app\obj\Debug\net8.0\TiendaPc.pdb
 C:\Users\DENNYS\Documents\sistema\app\obj\Debug\net8.0\TiendaPc.genruntimeconfig.cache
 C:\Users\DENNYS\Documents\sistema\app\obj\Debug\net8.0\ref\TiendaPc.dll
 C:\Users\DENNYS\Documents\sistema\app\bin\Debug\net8.0\Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore.dll
+C:\Users\DENNYS\Documents\sistema\app\obj\Debug\net8.0\TiendaPc.sourcelink.json

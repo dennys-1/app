@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata; // para PropertySaveBehavior
+
 using Microsoft.EntityFrameworkCore;
 using TiendaPc.Models;
 
@@ -132,15 +134,26 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
         mb.Entity<ItemCarrito>().Property(x => x.Cantidad).HasColumnName("cantidad");
         mb.Entity<ItemCarrito>().Property(x => x.PrecioUnitario).HasColumnName("precio_unitario");
 
-        mb.Entity<Pedido>().ToTable("pedido").HasKey(x => x.IdPedido);
-        mb.Entity<Pedido>().Property(x => x.IdPedido).HasColumnName("id_pedido");
-        mb.Entity<Pedido>().Property(x => x.NumeroPedido).HasColumnName("numero_pedido");
-        mb.Entity<Pedido>().Property(x => x.IdUsuario).HasColumnName("id_usuario");
-        mb.Entity<Pedido>().Property(x => x.Subtotal).HasColumnName("subtotal");
-        mb.Entity<Pedido>().Property(x => x.Impuesto).HasColumnName("impuesto");
-        mb.Entity<Pedido>().Property(x => x.Total).HasColumnName("total");
-        mb.Entity<Pedido>().Property(x => x.Estado).HasColumnName("estado");
-        mb.Entity<Pedido>().Property(x => x.CreadoEn).HasColumnName("creado_en");
+      // ========== P E D I D O ==========
+mb.Entity<Pedido>().ToTable("pedido").HasKey(x => x.IdPedido);
+mb.Entity<Pedido>().Property(x => x.IdPedido).HasColumnName("id_pedido");
+
+// ⚠️ Clave: que EF NO envíe numero_pedido en el INSERT (lo genera la BD)
+var numeroPedido = mb.Entity<Pedido>().Property(x => x.NumeroPedido)
+    .HasColumnName("numero_pedido")
+    .ValueGeneratedOnAdd();   // EF espera que lo genere la BD
+
+// Evitar que EF lo intente guardar antes o después (por si trae valor por defecto)
+numeroPedido.Metadata.SetBeforeSaveBehavior(PropertySaveBehavior.Ignore);
+numeroPedido.Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+
+mb.Entity<Pedido>().Property(x => x.IdUsuario).HasColumnName("id_usuario");
+mb.Entity<Pedido>().Property(x => x.Subtotal).HasColumnName("subtotal");
+mb.Entity<Pedido>().Property(x => x.Impuesto).HasColumnName("impuesto");
+mb.Entity<Pedido>().Property(x => x.Total).HasColumnName("total");
+mb.Entity<Pedido>().Property(x => x.Estado).HasColumnName("estado");
+mb.Entity<Pedido>().Property(x => x.CreadoEn).HasColumnName("creado_en");
+
 
         mb.Entity<ItemPedido>().ToTable("item_pedido").HasKey(x => x.IdItem);
         mb.Entity<ItemPedido>().Property(x => x.IdItem).HasColumnName("id_item");

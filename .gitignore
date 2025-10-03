@@ -1,0 +1,29 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Tt]emp/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.log
+
+# Rider / VS / VS Code
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# .NET
+*.nuget.props
+*.nuget.targets
+project.lock.json
+artifacts/
+
+# Others
+*.swp
+*.tmp
+*.DS_Store
+Thumbs.db

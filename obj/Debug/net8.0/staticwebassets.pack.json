@@ -1,0 +1,25 @@
+{
+  "Files": [
+    {
+      "Id": "C:\\Users\\DENNYS\\Documents\\sistema\\app\\wwwroot\\img\\logo.jpeg",
+      "PackagePath": "staticwebassets\\img\\logo.jpeg"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.TiendaPc.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.TiendaPc.props",
+      "PackagePath": "build\\TiendaPc.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.TiendaPc.props",
+      "PackagePath": "buildMultiTargeting\\TiendaPc.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.TiendaPc.props",
+      "PackagePath": "buildTransitive\\TiendaPc.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

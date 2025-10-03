@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Tb9L6+ecG54=",
+  "dgSpecHash": "XDgs23Ml0wo=",
   "success": true,
   "projectFilePath": "C:\\Users\\DENNYS\\Documents\\sistema\\app\\TiendaPc.csproj",
   "expectedPackageFiles": [
@@ -39,6 +39,7 @@
     "C:\\Users\\DENNYS\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
     "C:\\Users\\DENNYS\\.nuget\\packages\\npgsql\\8.0.0\\npgsql.8.0.0.nupkg.sha512",
     "C:\\Users\\DENNYS\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\8.0.0\\npgsql.entityframeworkcore.postgresql.8.0.0.nupkg.sha512",
+    "C:\\Users\\DENNYS\\.nuget\\packages\\questpdf\\2025.7.2\\questpdf.2025.7.2.nupkg.sha512",
     "C:\\Users\\DENNYS\\.nuget\\packages\\system.codedom\\4.4.0\\system.codedom.4.4.0.nupkg.sha512",
     "C:\\Users\\DENNYS\\.nuget\\packages\\system.collections.immutable\\6.0.0\\system.collections.immutable.6.0.0.nupkg.sha512",
     "C:\\Users\\DENNYS\\.nuget\\packages\\system.composition\\6.0.0\\system.composition.6.0.0.nupkg.sha512",

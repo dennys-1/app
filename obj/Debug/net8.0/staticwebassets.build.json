@@ -1,12 +1,20 @@
 {
   "Version": 1,
-  "Hash": "6vhiIvQIQD/rIcPE0niSLCIjC0eYjy9BoZ96GEZXbK4=",
+  "Hash": "iMJZqSBdxWrd/eyvzi4q5uMtLhbiMTWXNnF+QVi3hpU=",
   "Source": "TiendaPc",
   "BasePath": "_content/TiendaPc",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "TiendaPc\\wwwroot",
+      "Source": "TiendaPc",
+      "ContentRoot": "C:\\Users\\DENNYS\\Documents\\sistema\\app\\wwwroot\\",
+      "BasePath": "_content/TiendaPc",
+      "Pattern": "**"
+    }
+  ],
   "Assets": [
     {
       "Identity": "C:\\Users\\DENNYS\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\8.0.0\\staticwebassets\\V5\\css\\site.css",
@@ -1147,6 +1155,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "C:\\Users\\DENNYS\\.nuget\\packages\\microsoft.aspnetcore.identity.ui\\8.0.0\\staticwebassets\\V5\\lib\\jquery\\LICENSE.txt"
+    },
+    {
+      "Identity": "C:\\Users\\DENNYS\\Documents\\sistema\\app\\wwwroot\\img\\logo.jpeg",
+      "SourceId": "TiendaPc",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\DENNYS\\Documents\\sistema\\app\\wwwroot\\",
+      "BasePath": "_content/TiendaPc",
+      "RelativePath": "img/logo.jpeg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\img\\logo.jpeg"
     }
   ]
 }

@@ -134,34 +134,87 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
         mb.Entity<ItemCarrito>().Property(x => x.Cantidad).HasColumnName("cantidad");
         mb.Entity<ItemCarrito>().Property(x => x.PrecioUnitario).HasColumnName("precio_unitario");
 
-      // ========== P E D I D O ==========
-mb.Entity<Pedido>().ToTable("pedido").HasKey(x => x.IdPedido);
-mb.Entity<Pedido>().Property(x => x.IdPedido).HasColumnName("id_pedido");
+  // ==========================
+// P E D I D O
+// ==========================
+mb.Entity<Pedido>(entity =>
+{
+    entity.ToTable("pedido");
 
-// ⚠️ Clave: que EF NO envíe numero_pedido en el INSERT (lo genera la BD)
-var numeroPedido = mb.Entity<Pedido>().Property(x => x.NumeroPedido)
-    .HasColumnName("numero_pedido")
-    .ValueGeneratedOnAdd();   // EF espera que lo genere la BD
+    // PK interno: id_pedido (identity en BD)
+    entity.HasKey(x => x.IdPedido);
 
-// Evitar que EF lo intente guardar antes o después (por si trae valor por defecto)
-numeroPedido.Metadata.SetBeforeSaveBehavior(PropertySaveBehavior.Ignore);
-numeroPedido.Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+    entity.Property(x => x.IdPedido)
+        .HasColumnName("id_pedido")
+        .ValueGeneratedOnAdd(); // identity en Postgres
 
-mb.Entity<Pedido>().Property(x => x.IdUsuario).HasColumnName("id_usuario");
-mb.Entity<Pedido>().Property(x => x.Subtotal).HasColumnName("subtotal");
-mb.Entity<Pedido>().Property(x => x.Impuesto).HasColumnName("impuesto");
-mb.Entity<Pedido>().Property(x => x.Total).HasColumnName("total");
-mb.Entity<Pedido>().Property(x => x.Estado).HasColumnName("estado");
-mb.Entity<Pedido>().Property(x => x.CreadoEn).HasColumnName("creado_en");
+    // Número visible/correlativo generado por BD (NO se envía desde EF)
+    var numeroPedido = entity.Property(x => x.NumeroPedido)
+        .HasColumnName("numero_pedido")
+        .ValueGeneratedOnAdd(); // EF espera valor generado por BD
 
+    // Evitar que EF intente guardar un valor en inserts/updates
+    numeroPedido.Metadata.SetBeforeSaveBehavior(Microsoft.EntityFrameworkCore.Metadata.PropertySaveBehavior.Ignore);
+    numeroPedido.Metadata.SetAfterSaveBehavior(Microsoft.EntityFrameworkCore.Metadata.PropertySaveBehavior.Ignore);
 
-        mb.Entity<ItemPedido>().ToTable("item_pedido").HasKey(x => x.IdItem);
-        mb.Entity<ItemPedido>().Property(x => x.IdItem).HasColumnName("id_item");
-        mb.Entity<ItemPedido>().Property(x => x.IdPedido).HasColumnName("id_pedido");
-        mb.Entity<ItemPedido>().Property(x => x.IdProducto).HasColumnName("id_producto");
-        mb.Entity<ItemPedido>().Property(x => x.Cantidad).HasColumnName("cantidad");
-        mb.Entity<ItemPedido>().Property(x => x.PrecioUnitario).HasColumnName("precio_unitario");
-        mb.Entity<ItemPedido>().Property(x => x.TotalLinea).HasColumnName("total_linea");
+    entity.Property(x => x.IdUsuario).HasColumnName("id_usuario");
+
+    entity.Property(x => x.Subtotal)
+        .HasColumnName("subtotal")
+        .HasPrecision(18, 2);
+
+    entity.Property(x => x.Impuesto)
+        .HasColumnName("impuesto")
+        .HasPrecision(18, 2);
+
+    entity.Property(x => x.Total)
+        .HasColumnName("total")
+        .HasPrecision(18, 2);
+
+    entity.Property(x => x.Estado).HasColumnName("estado");
+    entity.Property(x => x.CreadoEn).HasColumnName("creado_en");
+
+    // Relación 1..N con item_pedido (FK: id_pedido)
+    entity.HasMany<ItemPedido>()
+        .WithOne()
+        .HasForeignKey(ip => ip.IdPedido)
+        .HasConstraintName("fk_item_pedido_pedido");
+});
+
+// ==========================
+// I T E M   P E D I D O
+// ==========================
+mb.Entity<ItemPedido>(entity =>
+{
+    entity.ToTable("item_pedido");
+
+    entity.HasKey(x => x.IdItem);
+
+    entity.Property(x => x.IdItem)
+        .HasColumnName("id_item")
+        .ValueGeneratedOnAdd(); // si id_item es identity
+
+    entity.Property(x => x.IdPedido)
+        .HasColumnName("id_pedido");
+
+    entity.Property(x => x.IdProducto)
+        .HasColumnName("id_producto");
+
+    entity.Property(x => x.Cantidad)
+        .HasColumnName("cantidad");
+
+    entity.Property(x => x.PrecioUnitario)
+        .HasColumnName("precio_unitario")
+        .HasPrecision(18, 2);
+
+    // total_linea calculado por Postgres (EF no lo envía)
+    entity.Property(x => x.TotalLinea)
+        .HasColumnName("total_linea")
+        .HasPrecision(18, 2)
+        .HasComputedColumnSql("\"cantidad\" * \"precio_unitario\"", stored: true)
+        .ValueGeneratedOnAddOrUpdate();
+});
+
 
         mb.Entity<Proveedor>().ToTable("proveedor").HasKey(x => x.IdProveedor);
         mb.Entity<Proveedor>().Property(x => x.IdProveedor).HasColumnName("id_proveedor");

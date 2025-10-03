@@ -70,6 +70,10 @@
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[8.0.0, )"
+            },
+            "QuestPDF": {
+              "target": "Package",
+              "version": "[2025.7.2, )"
             }
           },
           "imports": [

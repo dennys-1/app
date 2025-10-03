@@ -14,6 +14,7 @@
   <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.0" />
   <!-- Solo si quieres ver páginas de migración detalladas -->
   <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.0" />
+  <PackageReference Include="QuestPDF" Version="2025.7.2" />
 </ItemGroup>
 
 </Project>

@@ -1,0 +1,76 @@
+@{ Layout = "_AdminLayout"; }
+@{
+    ViewData["Title"] = "Panel Admin";
+}
+
+<h3 class="mb-4">Panel de Administración</h3>
+
+<div class="row g-3">
+  <div class="col-12 col-sm-6 col-lg-4">
+    <a class="text-decoration-none" asp-area="Admin" asp-controller="Productos" asp-action="Index">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex align-items-center mb-2">
+            <span class="badge text-bg-dark me-2">CAT</span>
+            <span class="fw-semibold">Productos</span>
+          </div>
+          <div class="text-muted small mb-3">Crear, editar y listar productos.</div>
+          <div class="mt-auto">
+            <span class="btn btn-outline-dark btn-sm">Ir a productos</span>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-12 col-sm-6 col-lg-4">
+    <a class="text-decoration-none" asp-area="Admin" asp-controller="Almacenes" asp-action="Index">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex align-items-center mb-2">
+            <span class="badge text-bg-secondary me-2">ALM</span>
+            <span class="fw-semibold">Almacenes</span>
+          </div>
+          <div class="text-muted small mb-3">Gestiona ubicaciones y stock base.</div>
+          <div class="mt-auto">
+            <span class="btn btn-outline-secondary btn-sm">Ir a almacenes</span>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-12 col-sm-6 col-lg-4">
+    <a class="text-decoration-none" asp-area="Admin" asp-controller="Stock" asp-action="Index">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex align-items-center mb-2">
+            <span class="badge text-bg-info me-2">STK</span>
+            <span class="fw-semibold">Stock</span>
+          </div>
+          <div class="text-muted small mb-3">Movimientos y ajustes de inventario.</div>
+          <div class="mt-auto">
+            <span class="btn btn-outline-info btn-sm">Ir a stock</span>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-12 col-sm-6 col-lg-4">
+    <a class="text-decoration-none" asp-area="Admin" asp-controller="Pedidos" asp-action="Index">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex align-items-center mb-2">
+            <span class="badge text-bg-success me-2">PED</span>
+            <span class="fw-semibold">Pedidos</span>
+          </div>
+          <div class="text-muted small mb-3">Ventas registradas y detalle.</div>
+          <div class="mt-auto">
+            <span class="btn btn-outline-success btn-sm">Ir a pedidos</span>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>

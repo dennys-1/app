@@ -56,7 +56,7 @@ public class CheckoutController : Controller
 
         var subtotal = items.Sum(x => x.Total);
         var igvRate = _cfg.GetSection("Impuestos").GetValue<decimal>("IGV", 0.18m);
-        var igv = Math.Round(subtotal * igvRate, 2);
+        var igv = Math.Round(subtotal * igvRate, 2, MidpointRounding.AwayFromZero);
         var total = subtotal + igv;
 
         return View(new CheckoutVm { Items = items, Subtotal = subtotal, Igv = igv, Total = total });
@@ -80,15 +80,15 @@ public class CheckoutController : Controller
 
         if (items.Count == 0) return RedirectToAction("Index", "Carrito");
 
-        var subtotal = items.Sum(x => x.i.Cantidad * x.i.PrecioUnitario);
         var igvRate = _cfg.GetSection("Impuestos").GetValue<decimal>("IGV", 0.18m);
-        var igv = Math.Round(subtotal * igvRate, 2);
+        var subtotal = items.Sum(x => x.i.Cantidad * x.i.PrecioUnitario);
+        var igv = Math.Round(subtotal * igvRate, 2, MidpointRounding.AwayFromZero);
         var total = subtotal + igv;
 
         using var tx = await _db.Database.BeginTransactionAsync();
         try
         {
-            // 1) Crear pedido (numero_pedido lo genera la BD)
+            // 1) Crear cabecera (numero_pedido lo genera la BD; NO asignarlo aquí)
             var pedido = new Pedido
             {
                 IdUsuario = userId,
@@ -100,27 +100,29 @@ public class CheckoutController : Controller
             };
 
             _db.Pedidos.Add(pedido);
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync();        // genera id_pedido (y numero_pedido si tiene DEFAULT)
 
-            // 2) Recargar para leer numero_pedido generado por la BD
-            await _db.Entry(pedido).ReloadAsync();
+            // Si numero_pedido lo setea la BD (DEFAULT/trigger), ya viene en la entidad.
+            // Si prefieres asegurar lectura, puedes descomentar:
+            // await _db.Entry(pedido).ReloadAsync();
 
-            // 3) Items + inventario
+            // 2) Insertar detalle (NO asignar TotalLinea: lo calcula la BD)
             foreach (var it in items)
             {
                 _db.ItemsPedido.Add(new ItemPedido
                 {
-                    IdPedido = pedido.IdPedido,
+                    IdPedido = pedido.IdPedido,        // FK real a pedido.id_pedido
                     IdProducto = it.p.IdProducto,
                     Cantidad = it.i.Cantidad,
-                    PrecioUnitario = it.i.PrecioUnitario,
-                    TotalLinea = it.i.Cantidad * it.i.PrecioUnitario
+                    PrecioUnitario = it.i.PrecioUnitario
+                    // TotalLinea: NO asignar (columna computada)
                 });
 
-                // asegurar fila de stock para (producto, almacén)
-                var stock = await _db.Stocks
-                    .FirstOrDefaultAsync(s => s.IdProducto == it.p.IdProducto && s.IdAlmacen == ALMACEN_VENTA);
-                if (stock == null)
+                // Asegurar fila de stock para (producto, almacén) sin SaveChanges dentro del bucle
+                var existeStock = await _db.Stocks
+                    .AnyAsync(s => s.IdProducto == it.p.IdProducto && s.IdAlmacen == ALMACEN_VENTA);
+
+                if (!existeStock)
                 {
                     _db.Stocks.Add(new Stock
                     {
@@ -128,7 +130,6 @@ public class CheckoutController : Controller
                         IdAlmacen = ALMACEN_VENTA,
                         Cantidad = 0
                     });
-                    await _db.SaveChangesAsync();
                 }
 
                 _db.MovimientosInventario.Add(new MovimientoInventario
@@ -137,16 +138,16 @@ public class CheckoutController : Controller
                     IdProducto = it.p.IdProducto,
                     Fecha = DateTimeOffset.UtcNow,
                     Tipo = "SALIDA_VENTA",
-                    Referencia = $"P{pedido.IdPedido}",
+                    Referencia = $"P{pedido.IdPedido}",   // o usa pedido.NumeroPedido si lo tienes formateado
                     Cantidad = -it.i.Cantidad,
                     CostoUnitario = 0,
                     Observacion = "Checkout"
                 });
             }
 
-            await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync(); // guarda detalle, stock que faltaba y movimientos
 
-            // 4) Vaciar carrito
+            // 3) Vaciar carrito
             var all = _db.ItemsCarrito.Where(x => x.IdCarrito == carritoId.Value);
             _db.ItemsCarrito.RemoveRange(all);
             await _db.SaveChangesAsync();
@@ -170,7 +171,7 @@ public class CheckoutController : Controller
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var p = await _db.Pedidos.FirstOrDefaultAsync(x => x.IdPedido == id && x.IdUsuario == userId);
         if (p == null) return NotFound();
-        return View(p);
+        return View(p); // sin VM extra; trabajas directo con Pedido como dijiste
     }
 }
 

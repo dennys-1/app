@@ -1,44 +1,67 @@
 @model TiendaPc.Models.Pedido
 @{
-  ViewData["Title"] = "Pedido confirmado";
-  Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "_Layout";
+    ViewData["Title"] = "Gracias por tu compra";
+    string numero = Model.NumeroPedido?.StartsWith("P") == true
+        ? Model.NumeroPedido!
+        : $"P{Model.IdPedido:D6}";
 }
 
-<div class="max-w-2xl mx-auto bg-white rounded-xl shadow p-6 text-center">
-  <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 mb-3">
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 13 4 4L19 7"/>
-    </svg>
+<!-- Fallback de estilos por si alguna hoja pisa utilidades de Bootstrap -->
+<style>
+  .exito-cards .card { border-radius: 16px; box-shadow: 0 6px 16px rgba(0,0,0,.06); border: 1px solid #eef0f2; }
+  .exito-cards .card .label { color:#6b7280; font-size: .88rem; margin-bottom: .25rem; }
+  .exito-check { width:64px;height:64px; border:2px solid #2ecc71; border-radius:12px; display:flex;align-items:center;justify-content:center; background:#E8F6EE; margin:0 auto 12px; }
+  .exito-btns a { min-width: 190px; }
+</style>
+
+<div class="container py-5">
+
+  <!-- Header con check -->
+  <div class="text-center mb-4">
+    <div class="exito-check"><span class="fs-1" style="color:#2ecc71;">✓</span></div>
+    <h2 class="fw-semibold mb-1">¡Gracias por tu compra!</h2>
+    <p class="mb-0">Tu pedido <strong>@numero</strong> fue creado correctamente.</p>
   </div>
 
-  <h1 class="text-2xl font-semibold">¡Gracias por tu compra!</h1>
-  <p class="text-gray-700 mt-1">
-    Tu pedido <b>@(string.IsNullOrWhiteSpace(Model.NumeroPedido) ? $"P{Model.IdPedido:D6}" : Model.NumeroPedido)</b> fue creado correctamente.
-  </p>
-
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 text-left">
-    <div class="bg-gray-50 rounded-lg p-4">
-      <div class="text-xs text-gray-500">N° de pedido</div>
-      <div class="font-semibold">
-        @(string.IsNullOrWhiteSpace(Model.NumeroPedido) ? $"P{Model.IdPedido:D6}" : Model.NumeroPedido)
+  <!-- Tres tarjetas -->
+  <div class="row g-3 justify-content-center exito-cards mb-4">
+    <div class="col-12 col-md-3">
+      <div class="card p-3 h-100">
+        <div class="label">N° de pedido</div>
+        <div class="fw-bold">@numero</div>
       </div>
     </div>
-    <div class="bg-gray-50 rounded-lg p-4">
-      <div class="text-xs text-gray-500">Estado</div>
-      <div class="font-semibold">@Model.Estado</div>
+    <div class="col-12 col-md-3">
+      <div class="card p-3 h-100">
+        <div class="label">Estado</div>
+        <div class="fw-bold">@Model.Estado</div>
+      </div>
     </div>
-    <div class="bg-gray-50 rounded-lg p-4">
-      <div class="text-xs text-gray-500">Total</div>
-      <div class="font-semibold">S/ @Model.Total.ToString("0.00")</div>
+    <div class="col-12 col-md-3">
+      <div class="card p-3 h-100">
+        <div class="label">Total</div>
+        <div class="fw-bold">S/ @Model.Total.ToString("N2")</div>
+      </div>
     </div>
   </div>
 
-  <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-    <a href="/MisPedidos" class="px-4 py-2 rounded border">Ver mis pedidos</a>
-    <a href="/Catalogo/Index" class="px-4 py-2 rounded bg-black text-white">Seguir comprando</a>
-  </div>
+<div class="d-flex gap-2 justify-content-center">
+    <!-- Ver mis pedidos -->
+    <a class="btn btn-outline-dark"
+       href="@Url.Action("MisPedidos", "Pedidos")">
+        Ver mis pedidos
+    </a>
 
-  <p class="mt-6 text-xs text-gray-500">
-    Recibirás un correo con el detalle de tu compra (opcional si luego agregamos notificaciones).
+    <!-- Seguir comprando (catálogo) -->
+    <a class="btn btn-dark"
+       href="@Url.Action("Index", "Catalogo")">
+        Seguir comprando
+    </a>
+</div>
+
+
+  <p class="text-center text-muted mt-4 mb-0">
+    Recibirás un correo con el detalle de tu compra (si habilitas notificaciones).
   </p>
 </div>

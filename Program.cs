@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TiendaPc.Data;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,19 +9,29 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
-// Identity (sin confirmar correo para pruebas)
-builder.Services.AddDefaultIdentity<IdentityUser>(opt =>
+// Cookies (sesión no persistente)
+builder.Services.ConfigureApplicationCookie(opt =>
 {
-    opt.SignIn.RequireConfirmedAccount = false;
-    opt.Password.RequiredLength = 6;
-    opt.Password.RequireDigit = false;
-    opt.Password.RequireLowercase = false;
-    opt.Password.RequireUppercase = false;
-    opt.Password.RequireNonAlphanumeric = false;
-})
-.AddEntityFrameworkStores<AppDbContext>();
+    opt.SlidingExpiration = false;
+    opt.ExpireTimeSpan = TimeSpan.FromHours(8);
+    opt.LoginPath = "/Cuenta/Login";
+});
 
-// >>> Ruta de Login personalizada
+// Identity + Roles
+builder.Services
+    .AddDefaultIdentity<IdentityUser>(opt =>
+    {
+        opt.SignIn.RequireConfirmedAccount = false;
+        opt.Password.RequiredLength = 6;
+        opt.Password.RequireDigit = false;
+        opt.Password.RequireLowercase = false;
+        opt.Password.RequireUppercase = false;
+        opt.Password.RequireNonAlphanumeric = false;
+    })
+    .AddRoles<IdentityRole>() // <- IMPORTANTE: agrega RoleManager/RoleStore
+    .AddEntityFrameworkStores<AppDbContext>();
+
+// Rutas de login/logout personalizadas (opcional si ya pusiste arriba LoginPath)
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Cuenta/Login";
@@ -30,6 +41,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+QuestPDF.Settings.License = LicenseType.Community;
 
 var app = builder.Build();
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -44,17 +58,31 @@ else
     app.UseHsts();
 }
 
+// 🚩 Área Admin (siempre antes de la ruta default)
+app.MapAreaControllerRoute(
+    name: "admin",
+    areaName: "Admin",
+    pattern: "Admin/{controller=Home}/{action=Index}/{id?}");
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Ruta default MVC
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.MapRazorPages(); // puede quedarse, pero ya no dependemos de /Identity/Account/Login
+app.MapRazorPages();
+
+// ⚙️ Ejecuta el Seeder (roles + usuario admin) ANTES de Run
+await DataSeeder.SeedRolesAndAdminAsync(app.Services);
 
 app.Run();
+
+// (No pongas nada después de app.Run())
 

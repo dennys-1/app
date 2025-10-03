@@ -1,0 +1,82 @@
+@model List<TiendaPc.Models.Producto>
+@{
+    ViewData["Title"] = "Productos";
+    var q = (string?)ViewBag.Q;
+    int page = ViewBag.Page ?? 1;
+    int pageSize = ViewBag.PageSize ?? 15;
+    int total = ViewBag.Total ?? (Model?.Count ?? 0);
+    int last = Math.Max(1, (int)Math.Ceiling(total / (double)pageSize));
+}
+
+<h4 class="mb-3">Productos</h4>
+
+@if (TempData["msg"] is string ok)
+{
+  <div class="alert alert-success">@ok</div>
+}
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-sm-6 col-md-4">
+    <input name="q" value="@q" class="form-control" placeholder="Buscar por nombre o SKU" />
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-dark">Buscar</button>
+  </div>
+  <div class="col-auto ms-auto">
+    <a asp-action="Create" class="btn btn-primary">Nuevo</a>
+  </div>
+</form>
+
+<div class="table-responsive">
+<table class="table table-sm align-middle">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>SKU</th>
+      <th>Nombre</th>
+      <th class="text-end">Precio</th>
+      <th>Activo</th>
+      <th style="width:160px"></th>
+    </tr>
+  </thead>
+  <tbody>
+  @foreach (var p in Model)
+  {
+    <tr>
+      <td>@p.IdProducto</td>
+      <td>@p.Sku</td>
+      <td>@p.Nombre</td>
+      <td class="text-end">S/ @p.Precio.ToString("N2")</td>
+      <td>@(p.Activo ? "Sí" : "No")</td>
+      <td class="text-end">
+        <a asp-action="Edit" asp-route-id="@p.IdProducto" class="btn btn-sm btn-outline-secondary">Editar</a>
+        <form asp-action="Delete" asp-route-id="@p.IdProducto" method="post" class="d-inline">
+          @Html.AntiForgeryToken()
+          <button class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar?')">Borrar</button>
+        </form>
+      </td>
+    </tr>
+  }
+  </tbody>
+</table>
+</div>
+
+@if (last > 1)
+{
+  <nav aria-label="Paginación" class="mt-2">
+    <ul class="pagination pagination-sm">
+      <li class="page-item @(page<=1 ? "disabled" : "")">
+        <a class="page-link" asp-action="Index" asp-route-q="@q" asp-route-page="@(page-1)" asp-route-pageSize="@pageSize">Anterior</a>
+      </li>
+<li class="page-item disabled">
+  <span class="page-link">Página @(page) de @(last)</span>
+</li>
+
+
+
+      <li class="page-item @(page>=last ? "disabled" : "")">
+        <a class="page-link" asp-action="Index" asp-route-q="@q" asp-route-page="@(page+1)" asp-route-pageSize="@pageSize">Siguiente</a>
+      </li>
+    </ul>
+  </nav>
+}

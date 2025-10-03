@@ -1,0 +1,77 @@
+@model List<TiendaPc.Models.PedidoListItemVm>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Mis pedidos";
+}
+
+<div class="container py-4">
+    <h3 class="mb-3">Mis pedidos</h3>
+
+    @if (Model == null)
+    {
+        <div class="alert alert-warning">Model es null</div>
+    }
+    else if (!Model.Any())
+    {
+        <div class="alert alert-info">Aún no tienes pedidos.</div>
+        <a class="btn btn-dark" href="@Url.Action("Index","Catalogo")">Ir al catálogo</a>
+    }
+    else
+    {
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>N° Pedido</th>
+                    <th>Estado</th>
+                    <th class="text-end">Total</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td>@p.NumeroPedido</td>
+                    <td>@p.Estado</td>
+                    <td class="text-end">S/ @p.Total.ToString("N2")</td>
+                    <td>@p.CreadoEn.LocalDateTime</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary"
+                           href='@Url.Action("Detalle","Pedidos", new { id = p.IdPedido })'>Ver detalle</a>
+                        <a class="btn btn-sm btn-outline-dark ms-1"
+                           href='@Url.Action("Descargar","Pedidos", new { id = p.IdPedido })'>PDF</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        
+    }
+    @{
+    var page = (int)(ViewBag.Page ?? 1);
+    var pageSize = (int)(ViewBag.PageSize ?? 10);
+    var total = (int)(ViewBag.Total ?? 0);
+    var pages = (int)Math.Ceiling(total / (double)pageSize);
+}
+@if (pages > 1)
+{
+    <nav class="mt-3">
+        <ul class="pagination">
+            <li class="page-item @(page == 1 ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("MisPedidos", new { page = page - 1, pageSize })">Anterior</a>
+            </li>
+            @for (int i = 1; i <= pages; i++)
+            {
+                <li class="page-item @(i == page ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("MisPedidos", new { page = i, pageSize })">@i</a>
+                </li>
+            }
+            <li class="page-item @(page == pages ? "disabled" : "")">
+                <a class="page-link" href="@Url.Action("MisPedidos", new { page = page + 1, pageSize })">Siguiente</a>
+            </li>
+        </ul>
+    </nav>
+}
+
+</div>

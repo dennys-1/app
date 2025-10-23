@@ -1,0 +1,80 @@
+@model List<TiendaPc.Areas.Admin.Controllers.ComprasController.OcRowVm>
+
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Órdenes de compra";
+
+    var q = ViewBag.Q as string ?? "";
+    var estado = ViewBag.Estado as string ?? "";
+}
+
+<h3 class="mb-3">Órdenes de compra</h3>
+
+@if (TempData["msg"] != null)
+{
+    <div class="alert alert-success">@TempData["msg"]</div>
+}
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input class="form-control" name="q" value="@q" placeholder="N° OC o Proveedor" />
+    </div>
+
+    <div class="col-md-3">
+        <select class="form-select" name="estado">
+            <option value="" @(string.IsNullOrEmpty(estado) ? "selected=\"selected\"" : "")>Todos</option>
+            <option value="Emitida" @(estado == "Emitida" ? "selected=\"selected\"" : "")>Emitida</option>
+            <option value="Recibida Parcial" @(estado == "Recibida Parcial" ? "selected=\"selected\"" : "")>Recibida Parcial</option>
+            <option value="Completada" @(estado == "Completada" ? "selected=\"selected\"" : "")>Completada</option>
+            <option value="Anulada" @(estado == "Anulada" ? "selected=\"selected\"" : "")>Anulada</option>
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <button class="btn btn-dark w-100">Filtrar</button>
+    </div>
+
+    <div class="col-md-3 text-md-end">
+        <a asp-action="Create" class="btn btn-primary w-100 w-md-auto">Nueva OC</a>
+    </div>
+</form>
+
+@if (Model == null || Model.Count == 0)
+{
+    <div class="alert alert-info">No hay resultados.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>N°</th>
+                    <th>Proveedor</th>
+                    <th>Almacén</th>
+                    <th class="text-end">Total</th>
+                    <th>Estado</th>
+                    <th>Emisión</th>
+                    <th style="width:160px"></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var o in Model)
+            {
+                <tr>
+                    <td>@o.Numero</td>
+                    <td class="text-truncate" style="max-width:240px">@o.Proveedor</td>
+                    <td>@o.Almacen</td>
+                    <td class="text-end">S/ @o.Total.ToString("N2")</td>
+                    <td>@o.Estado</td>
+                    <td>@o.FechaEmision.ToString("dd/MM/yyyy")</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary" asp-action="Detalle" asp-route-id="@o.IdOc">Detalle</a>
+                        <a class="btn btn-sm btn-outline-dark ms-1" asp-action="Recibir" asp-route-id="@o.IdOc">Recibir</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

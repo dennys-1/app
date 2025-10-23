@@ -1,0 +1,82 @@
+@model List<TiendaPc.Areas.Admin.Controllers.PedidosController.PedidoListVm>
+
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Pedidos";
+
+    var est = (string?)ViewBag.Estado ?? "";
+    string[] estados = new[] { "Pendiente","Pagado","Enviado","Completado","Cancelado" };
+
+    DateTime? d = ViewBag.Desde as DateTime?;
+    DateTime? h = ViewBag.Hasta as DateTime?;
+}
+
+<h3>Pedidos</h3>
+
+<form class="row g-2 mb-3">
+  <div class="col-md-3">
+    <input class="form-control" name="q" value="@((string?)ViewBag.Q)" placeholder="N° pedido o usuario" />
+  </div>
+
+  <div class="col-md-3">
+    <select name="estado" class="form-select">
+      <option value="">Todos</option>
+      @foreach (var e in estados)
+      {@if (est.Equals(e, StringComparison.OrdinalIgnoreCase))
+{
+    <option value="@e" selected>@e</option>
+}
+else
+{
+    <option value="@e">@e</option>
+}
+
+      }
+    </select>
+  </div>
+
+  <div class="col-md-2">
+    <input type="date" class="form-control" name="desde"
+           value="@(d.HasValue ? d.Value.ToString("yyyy-MM-dd") : "")" />
+  </div>
+
+  <div class="col-md-2">
+    <input type="date" class="form-control" name="hasta"
+           value="@(h.HasValue ? h.Value.ToString("yyyy-MM-dd") : "")" />
+  </div>
+
+  <div class="col-md-2">
+    <button class="btn btn-dark w-100">Filtrar</button>
+  </div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead>
+      <tr>
+        <th>N°</th>
+        <th>Usuario</th>
+        <th>Estado</th>
+        <th class="text-end">Total</th>
+        <th>Fecha</th>
+        <th style="width:130px"></th>
+      </tr>
+    </thead>
+    <tbody>
+    @foreach (var p in Model)
+    {
+      <tr>
+        <td>@p.Numero</td>
+        <td class="text-truncate" style="max-width:220px">@p.Usuario</td>
+        <td>@p.Estado</td>
+        <td class="text-end">S/ @p.Total.ToString("N2")</td>
+        <td>@p.CreadoEn.LocalDateTime.ToString("dd/MM/yyyy HH:mm")</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-secondary"
+             asp-action="Detalle" asp-route-id="@p.IdPedido">Ver detalle</a>
+        </td>
+      </tr>
+    }
+    </tbody>
+  </table>
+</div>

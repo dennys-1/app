@@ -1,0 +1,68 @@
+@model TiendaPc.Areas.Admin.Controllers.ComprasController.RecibirVm
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Recepción de compra";
+}
+
+<h3 class="mb-3">Recepcionar OC #@Model.IdOc</h3>
+
+@if (!ViewData.ModelState.IsValid)
+{
+  <div class="alert alert-danger">
+    @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors)) { <div>@e.ErrorMessage</div> }
+  </div>
+}
+
+<form asp-action="Recibir" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="IdOc"/>
+
+    <div class="row g-2 mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Guía de Remisión</label>
+            <input asp-for="GuiaRemision" class="form-control"/>
+        </div>
+        <div class="col-md-8">
+            <label class="form-label">Observación</label>
+            <input asp-for="Observacion" class="form-control"/>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>SKU</th>
+                    <th class="text-end">Pendiente</th>
+                    <th class="text-end" style="width:160px">Recibir ahora</th>
+                </tr>
+            </thead>
+            <tbody>
+@for (int i=0;i<Model.Items.Count;i++)
+{
+    <tr>
+        <td>
+            @Model.Items[i].Producto
+            <input type="hidden" name="Items[@i].IdProducto" value="@Model.Items[i].IdProducto" />
+            <input type="hidden" name="Items[@i].Producto"  value="@Model.Items[i].Producto" />
+            <input type="hidden" name="Items[@i].Sku"       value="@Model.Items[i].Sku" />
+            <input type="hidden" name="Items[@i].Pendiente" value="@Model.Items[i].Pendiente" />
+        </td>
+        <td>@Model.Items[i].Sku</td>
+        <td class="text-end">@Model.Items[i].Pendiente</td>
+        <td class="text-end">
+            <input class="form-control text-end" type="number" min="0" max="@Model.Items[i].Pendiente"
+                   name="Items[@i].Cantidad" value="@Model.Items[i].Cantidad" />
+        </td>
+    </tr>
+}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-2">
+        <button class="btn btn-dark">Registrar recepción</button>
+        <a asp-action="Detalle" asp-route-id="@Model.IdOc" class="btn btn-outline-secondary ms-2">Cancelar</a>
+    </div>
+</form>

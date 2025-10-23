@@ -13,40 +13,66 @@ public class AlmacenesController : Controller
     private readonly AppDbContext _db;
     public AlmacenesController(AppDbContext db) => _db = db;
 
+    // GET: /Admin/Almacenes
     public async Task<IActionResult> Index()
-        => View(await _db.Almacenes.OrderBy(x=>x.IdAlmacen).ToListAsync());
-
-    public IActionResult Create() => View(new Almacen{Activo = true});
-
-    [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Almacen m)
     {
-        if (!ModelState.IsValid) return View(m);
-        _db.Almacenes.Add(m); await _db.SaveChangesAsync();
+        var list = await _db.Almacenes
+            .OrderBy(a => a.Nombre)
+            .ToListAsync();
+        return View(list);
+    }
+
+    // GET: /Admin/Almacenes/Create
+    public IActionResult Create()
+        => View(new Almacen { Activo = true });
+
+    // POST: /Admin/Almacenes/Create
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Almacen model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        _db.Almacenes.Add(model);
+        await _db.SaveChangesAsync();
+
+        TempData["msg"] = "Almacén creado correctamente.";
         return RedirectToAction(nameof(Index));
     }
 
+    // GET: /Admin/Almacenes/Edit/5
     public async Task<IActionResult> Edit(int id)
     {
-        var a = await _db.Almacenes.FindAsync(id);
-        if (a == null) return NotFound();
-        return View(a);
+        var alm = await _db.Almacenes.FindAsync(id);
+        if (alm == null) return NotFound();
+        return View(alm);
     }
 
+    // POST: /Admin/Almacenes/Edit
     [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Almacen m)
+    public async Task<IActionResult> Edit(Almacen model)
     {
-        if (!ModelState.IsValid) return View(m);
-        _db.Almacenes.Update(m); await _db.SaveChangesAsync();
+        if (!ModelState.IsValid)
+            return View(model);
+
+        _db.Almacenes.Update(model);
+        await _db.SaveChangesAsync();
+
+        TempData["msg"] = "Almacén actualizado.";
         return RedirectToAction(nameof(Index));
     }
 
+    // POST: /Admin/Almacenes/Delete/5
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
-        var a = await _db.Almacenes.FindAsync(id);
-        if (a == null) return NotFound();
-        _db.Almacenes.Remove(a); await _db.SaveChangesAsync();
+        var alm = await _db.Almacenes.FindAsync(id);
+        if (alm == null) return NotFound();
+
+        _db.Almacenes.Remove(alm);
+        await _db.SaveChangesAsync();
+
+        TempData["msg"] = "Almacén eliminado.";
         return RedirectToAction(nameof(Index));
     }
 }

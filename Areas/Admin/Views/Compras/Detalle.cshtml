@@ -1,0 +1,54 @@
+@model TiendaPc.Areas.Admin.Controllers.ComprasController.DetalleOcVm
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Detalle OC";
+}
+
+<h3 class="mb-3">OC @Model.Numero</h3>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-3"><strong>Proveedor:</strong> @Model.Proveedor</div>
+    <div class="col-md-3"><strong>Almacén:</strong> @Model.Almacen</div>
+    <div class="col-md-2"><strong>Estado:</strong> <span class="badge bg-secondary">@Model.Estado</span></div>
+    <div class="col-md-2"><strong>Emisión:</strong> @Model.FechaEmision.ToString("dd/MM/yyyy")</div>
+    <div class="col-md-2"><strong>Entrega:</strong> @(Model.FechaEntrega?.ToString("dd/MM/yyyy") ?? "-")</div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered align-middle">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>SKU</th>
+                <th class="text-end">Cant.</th>
+                <th class="text-end">P. Unit.</th>
+                <th class="text-end">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var it in Model.Items)
+        {
+            <tr>
+                <td>@it.Producto</td>
+                <td>@it.Sku</td>
+                <td class="text-end">@it.Cantidad</td>
+                <td class="text-end">S/ @it.PrecioUnitario.ToString("N2")</td>
+                <td class="text-end">S/ @it.TotalLinea.ToString("N2")</td>
+            </tr>
+        }
+        </tbody>
+        <tfoot>
+            <tr><th colspan="4" class="text-end">Subtotal:</th><th class="text-end">S/ @Model.Subtotal.ToString("N2")</th></tr>
+            <tr><th colspan="4" class="text-end">IGV:</th><th class="text-end">S/ @Model.Impuesto.ToString("N2")</th></tr>
+            <tr><th colspan="4" class="text-end">Total:</th><th class="text-end h5">S/ @Model.Total.ToString("N2")</th></tr>
+        </tfoot>
+    </table>
+</div>
+
+<div class="mt-2">
+    <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
+    @if (Model.Estado != "Completada" && Model.Estado != "Anulada")
+    {
+        <a class="btn btn-dark ms-2" asp-action="Recibir" asp-route-id="@Model.IdOc">Registrar recepción</a>
+    }
+</div>

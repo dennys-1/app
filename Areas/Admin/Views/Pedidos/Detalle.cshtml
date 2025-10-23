@@ -1,0 +1,99 @@
+@model TiendaPc.Areas.Admin.Controllers.PedidosController.PedidoAdminVm
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Detalle pedido";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>Pedido @Model.Numero</h3>
+  <div class="d-flex gap-2">
+    <!-- Ya tienes el form CambiarEstado -->
+    <a class="btn btn-sm btn-outline-secondary" asp-action="Index">Volver</a>
+  </div>
+</div>
+
+@if (TempData["msg"] != null)
+{ <div class="alert alert-success">@TempData["msg"]</div> }
+
+<div class="row g-3 mb-3">
+  <div class="col-md-3"><div class="p-3 border rounded-3"><div class="text-muted small">Usuario</div><div class="fw-bold">@Model.Usuario</div></div></div>
+  <div class="col-md-3"><div class="p-3 border rounded-3"><div class="text-muted small">Estado</div><div class="fw-bold">@Model.Estado</div></div></div>
+  <div class="col-md-3"><div class="p-3 border rounded-3"><div class="text-muted small">Subtotal</div><div class="fw-bold">S/ @Model.Subtotal.ToString("N2")</div></div></div>
+  <div class="col-md-3"><div class="p-3 border rounded-3"><div class="text-muted small">IGV</div><div class="fw-bold">S/ @Model.Impuesto.ToString("N2")</div></div></div>
+</div>
+
+<!-- NUEVO: Bloques de Pago / Envío -->
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="p-3 border rounded-3">
+      <div class="d-flex justify-content-between">
+        <div><div class="text-muted small">Pago</div></div>
+        <div>
+          <form asp-action="MarcarPagado" method="post" class="d-flex gap-2">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.IdPedido" />
+            <input type="text" name="referencia" class="form-control form-control-sm" placeholder="Ref. pago"
+                   value="@(Model.ReferenciaPago ?? "")" style="max-width:200px" />
+            <button class="btn btn-sm btn-success">Marcar pagado</button>
+          </form>
+        </div>
+      </div>
+      <div class="mt-2">
+        <div><span class="text-muted">Referencia:</span> @(Model.ReferenciaPago ?? "-")</div>
+        <div><span class="text-muted">Pagado en:</span> @(Model.PagadoEn.HasValue ? Model.PagadoEn.Value.LocalDateTime.ToString("dd/MM/yyyy HH:mm") : "-")</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="p-3 border rounded-3">
+      <div class="d-flex justify-content-between">
+        <div><div class="text-muted small">Envío</div></div>
+        <div>
+          <form asp-action="RegistrarEnvio" method="post" class="d-flex flex-wrap gap-2">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" value="@Model.IdPedido" />
+            <input type="text" name="courier" class="form-control form-control-sm" placeholder="Courier" value="@(Model.Courier ?? "")" style="width:120px" />
+            <input type="text" name="tracking" class="form-control form-control-sm" placeholder="Tracking" value="@(Model.Tracking ?? "")" style="width:160px" />
+            <input type="date" name="fecha" class="form-control form-control-sm" value="@(Model.EnviadoEn.HasValue ? Model.EnviadoEn.Value.LocalDateTime.ToString("yyyy-MM-dd") : "")" />
+            <button class="btn btn-sm btn-info">Registrar envío</button>
+          </form>
+        </div>
+      </div>
+      <div class="mt-2">
+        <div><span class="text-muted">Courier:</span> @(Model.Courier ?? "-")</div>
+        <div><span class="text-muted">Tracking:</span> @(Model.Tracking ?? "-")</div>
+        <div><span class="text-muted">Enviado en:</span> @(Model.EnviadoEn.HasValue ? Model.EnviadoEn.Value.LocalDateTime.ToString("dd/MM/yyyy HH:mm") : "-")</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="table-responsive">
+<table class="table align-middle">
+  <thead>
+    <tr>
+      <th>Producto</th>
+      <th>SKU</th>
+      <th class="text-end">Cant.</th>
+      <th class="text-end">P.Unit</th>
+      <th class="text-end">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+  @foreach (var it in Model.Items)
+  {
+    <tr>
+      <td>@it.Producto</td>
+      <td>@it.Sku</td>
+      <td class="text-end">@it.Cantidad</td>
+      <td class="text-end">S/ @it.PrecioUnitario.ToString("N2")</td>
+      <td class="text-end">S/ @it.TotalLinea.ToString("N2")</td>
+    </tr>
+  }
+  </tbody>
+  <tfoot>
+    <tr><th colspan="4" class="text-end">Total</th><th class="text-end">S/ @Model.Total.ToString("N2")</th></tr>
+  </tfoot>
+</table>
+</div>

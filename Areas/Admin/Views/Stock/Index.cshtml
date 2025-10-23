@@ -1,0 +1,81 @@
+@using TiendaPc.Areas.Admin.Controllers
+@model List<StockController.StockRowVm>
+
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Stock";
+
+    var almacenes = ViewBag.Almacenes as IEnumerable<Almacen> ?? Enumerable.Empty<Almacen>();
+    int? almacenSel = ViewBag.AlmacenId as int?;
+    string q = ViewBag.Q as string ?? "";
+}
+
+<h3 class="mb-3">Stock</h3>
+
+@if (TempData["msg"] != null)
+{
+    <div class="alert alert-success">@TempData["msg"]</div>
+}
+
+<form class="row g-2 mb-3" method="get">
+    <div class="col-md-4">
+        <input class="form-control" name="q" value="@q" placeholder="Producto o SKU" />
+    </div>
+    <div class="col-md-3">
+        <select class="form-select" name="almacenId">
+            <option value="">Todos los almacenes</option>
+            @foreach (var a in almacenes)
+            {
+                var selected = almacenSel.HasValue && almacenSel.Value == a.IdAlmacen;
+                <option value="@a.IdAlmacen" selected="@(selected ? "selected" : null)">@a.Nombre</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-dark w-100">Filtrar</button>
+    </div>
+    <div class="col-md-3 text-end">
+        <a asp-action="Transferir" class="btn btn-outline-dark">Transferir entre almacenes</a>
+    </div>
+</form>
+
+@if (Model == null || Model.Count == 0)
+{
+    <div class="alert alert-info">No hay resultados para el filtro seleccionado.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>SKU</th>
+                    <th>Almacén</th>
+                    <th class="text-end">Stock</th>
+                    <th style="width:210px"></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.Producto</td>
+                    <td>@r.Sku</td>
+                    <td>@r.Almacen</td>
+                    <td class="text-end">@r.Cantidad</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary"
+                           asp-action="Ajustar"
+                           asp-route-idProducto="@r.IdProducto"
+                           asp-route-idAlmacen="@r.IdAlmacen">Ajustar</a>
+
+                        <a class="btn btn-sm btn-outline-dark ms-1"
+                           asp-action="Transferir">Transferir</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

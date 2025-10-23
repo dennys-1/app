@@ -7,6 +7,10 @@ public class PedidoListItemVm
     public string Estado { get; set; } = "Pendiente";
     public decimal Total { get; set; }
     public DateTimeOffset CreadoEn { get; set; }
+
+    // Extras opcionales
+    public string? ReferenciaPago { get; set; }
+    public string? Tracking { get; set; }
 }
 
 public class PedidoDetalleVm
@@ -19,6 +23,15 @@ public class PedidoDetalleVm
     public decimal Total { get; set; }
     public DateTimeOffset CreadoEn { get; set; }
     public List<PedidoDetalleItemVm> Items { get; set; } = new();
+
+    // Pago
+    public string? ReferenciaPago { get; set; }
+    public DateTimeOffset? PagadoEn { get; set; }
+
+    // Envío
+    public string? Courier { get; set; }
+    public string? Tracking { get; set; }
+    public DateTimeOffset? EnviadoEn { get; set; }
 }
 
 public class PedidoDetalleItemVm

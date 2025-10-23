@@ -1,12 +1,15 @@
 @model TiendaPc.Models.Producto
+
 @{
     ViewData["Title"] = "Nuevo producto";
 }
 <h4 class="mb-3">Nuevo producto</h4>
 
+<!-- Mostrar errores del modelo si los hubiera -->
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
 <form asp-action="Create" method="post" enctype="multipart/form-data" class="card card-body shadow-sm">
   @Html.AntiForgeryToken()
-
   <partial name="_Form" />
 
   <div class="row g-3 mt-1">
@@ -23,4 +26,6 @@
   </div>
 </form>
 
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+@section Scripts {
+  <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,35 @@
+@model AjusteVm
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Ajustar stock";
+}
+
+<h3>Ajustar stock</h3>
+
+<div class="mb-2 text-muted">
+    <b>Producto:</b> @Model.Producto (@Model.Sku) &nbsp;|&nbsp;
+    <b>Almacén:</b> @Model.Almacen &nbsp;|&nbsp;
+    <b>Actual:</b> @Model.CantidadActual
+</div>
+
+<form asp-action="Ajustar" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="IdProducto" />
+    <input type="hidden" asp-for="IdAlmacen" />
+
+    <div class="row g-2">
+        <div class="col-md-4">
+            <label class="form-label">Cantidad (positivo suma / negativo resta)</label>
+            <input asp-for="Delta" class="form-control" type="number" />
+        </div>
+        <div class="col-md-8">
+            <label class="form-label">Motivo</label>
+            <input asp-for="Motivo" class="form-control" />
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button class="btn btn-dark">Aplicar</button>
+        <a asp-action="Index" class="btn btn-outline-secondary ms-2">Cancelar</a>
+    </div>
+</form>

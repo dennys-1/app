@@ -1,0 +1,73 @@
+@model TiendaPc.Models.Proveedor
+
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+<div class="row g-3">
+  <div class="col-md-4">
+    <label asp-for="Ruc" class="form-label"></label>
+    <div class="input-group">
+      <input asp-for="Ruc" class="form-control" />
+      <button type="button" id="btnBuscarRuc" class="btn btn-outline-secondary">Buscar</button>
+    </div>
+    <span asp-validation-for="Ruc" class="text-danger"></span>
+  </div>
+
+  <div class="col-md-8">
+    <label asp-for="RazonSocial" class="form-label"></label>
+    <input asp-for="RazonSocial" class="form-control" />
+    <span asp-validation-for="RazonSocial" class="text-danger"></span>
+  </div>
+
+  <div class="col-md-6">
+    <label asp-for="Contacto" class="form-label"></label>
+    <input asp-for="Contacto" class="form-control" />
+    <span asp-validation-for="Contacto" class="text-danger"></span>
+  </div>
+
+  <div class="col-md-3">
+    <label asp-for="Telefono" class="form-label"></label>
+    <input asp-for="Telefono" class="form-control" />
+    <span asp-validation-for="Telefono" class="text-danger"></span>
+  </div>
+
+  <div class="col-md-3">
+    <label asp-for="Email" class="form-label"></label>
+    <input asp-for="Email" class="form-control" />
+    <span asp-validation-for="Email" class="text-danger"></span>
+  </div>
+
+  <div class="col-md-12">
+    <label asp-for="Direccion" class="form-label"></label>
+    <input asp-for="Direccion" class="form-control" />
+    <span asp-validation-for="Direccion" class="text-danger"></span>
+  </div>
+
+  <div class="col-md-3">
+    <div class="form-check mt-2">
+      <input class="form-check-input" asp-for="Activo" />
+      <label class="form-check-label" asp-for="Activo"></label>
+    </div>
+  </div>
+</div>
+
+@section Scripts{
+<script>
+document.getElementById('btnBuscarRuc')?.addEventListener('click', async () => {
+  const ruc = document.getElementById('Ruc').value?.trim();
+  if (!ruc) { alert('Ingresa un RUC/DNI'); return; }
+
+  try{
+    const url = `/Admin/Proveedores/BuscarRuc?ruc=${encodeURIComponent(ruc)}`;
+    const r = await fetch(url, { headers: { 'Accept':'application/json' }});
+    const j = await r.json();
+    if(!r.ok){ alert(j?.error ?? 'No encontrado'); return; }
+
+    // completa campos
+    if(j.razonSocial) document.getElementById('RazonSocial').value = j.razonSocial;
+    if(j.direccion)   document.getElementById('Direccion').value   = j.direccion;
+  }catch{
+    alert('No se pudo consultar el RUC en este momento.');
+  }
+});
+</script>
+}

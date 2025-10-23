@@ -1,0 +1,43 @@
+@model List<TiendaPc.Areas.Admin.Controllers.VentasController.VentaVm>
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Ventas registradas";
+}
+<h3>Ventas registradas</h3>
+
+<form class="row g-2 mb-3">
+  <div class="col-md-3"><input type="date" class="form-control" name="desde" value="@(ViewBag.Desde is DateTime d? d.ToString("yyyy-MM-dd") : "")" /></div>
+  <div class="col-md-3"><input type="date" class="form-control" name="hasta" value="@(ViewBag.Hasta is DateTime h? h.ToString("yyyy-MM-dd") : "")" /></div>
+  <div class="col-md-6 d-flex gap-2">
+    <button class="btn btn-dark">Filtrar</button>
+    <a class="btn btn-outline-secondary" asp-action="Csv" asp-route-desde="@ViewBag.Desde" asp-route-hasta="@ViewBag.Hasta">Exportar CSV</a>
+  </div>
+</form>
+
+<div class="table-responsive">
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>N°</th><th>Fecha</th><th class="text-end">Total</th><th>Estado</th>
+    </tr>
+  </thead>
+  <tbody>
+  @foreach (var v in Model)
+  {
+    <tr>
+      <td>@v.Numero</td>
+      <td>@v.Fecha.LocalDateTime.ToString("dd/MM/yyyy HH:mm")</td>
+      <td class="text-end">S/ @v.Total.ToString("N2")</td>
+      <td>@v.Estado</td>
+    </tr>
+  }
+  </tbody>
+  <tfoot>
+    <tr><th colspan="2" class="text-end">TOTAL</th><th class="text-end">S/ @((decimal)ViewBag.Total).ToString("N2")</th><th></th></tr>
+  </tfoot>
+</table>
+</div>
+@if (!Model.Any())
+{
+  <div class="alert alert-info">No se encontraron ventas.</div>
+}

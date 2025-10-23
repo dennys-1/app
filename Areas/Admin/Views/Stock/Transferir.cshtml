@@ -1,0 +1,206 @@
+@model TiendaPc.Areas.Admin.Models.TransferenciaVm
+@using TiendaPc.Models
+
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Transferir stock";
+
+    var almacenes = ViewBag.Almacenes as IEnumerable<Almacen> ?? Enumerable.Empty<Almacen>();
+    var productos = ViewBag.Productos as IEnumerable<Producto> ?? Enumerable.Empty<Producto>();
+
+    Model.Items ??= new List<TiendaPc.Areas.Admin.Models.ItemTransferenciaVm>();
+    if (Model.Items.Count == 0)
+        Model.Items.Add(new TiendaPc.Areas.Admin.Models.ItemTransferenciaVm());
+}
+
+<h3>Transferir stock</h3>
+
+@if (!ViewData.ModelState.IsValid)
+{
+  <div class="alert alert-danger">
+    @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+    { <div>@e.ErrorMessage</div> }
+  </div>
+}
+
+<form asp-action="Transferir" method="post" id="formTransfer">
+  @Html.AntiForgeryToken()
+
+  <div class="row mb-3">
+    <div class="col-md-6">
+      <label class="form-label">Almacén Origen</label>
+      <select asp-for="IdAlmacenOrigen" class="form-select" id="almacenOrigen">
+        <option value="">-- Seleccione --</option>
+        @foreach (var a in almacenes) { <option value="@a.IdAlmacen">@a.Nombre</option> }
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Almacén Destino</label>
+      <select asp-for="IdAlmacenDestino" class="form-select" id="almacenDestino">
+        <option value="">-- Seleccione --</option>
+        @foreach (var a in almacenes) { <option value="@a.IdAlmacen">@a.Nombre</option> }
+      </select>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center">
+    <h5 class="mb-2">Productos</h5>
+    <button type="button" class="btn btn-sm btn-outline-dark" id="btnAdd">+ Agregar fila</button>
+  </div>
+
+  <table class="table table-bordered align-middle" id="tablaItems">
+    <thead>
+      <tr>
+        <th style="width:55%">Producto</th>
+        <th style="width:20%">Stock origen</th>
+        <th style="width:15%">Cantidad</th>
+        <th style="width:10%"></th>
+      </tr>
+    </thead>
+    <tbody>
+@for (int i = 0; i < Model.Items.Count; i++)
+{
+  var idSel = Model.Items[i].IdProducto;
+  <tr>
+    <td>
+      <select name="Items[@i].IdProducto" class="form-select prod-select">
+        <option value="">-- Seleccione --</option>
+      @foreach (var p in productos)
+{
+    if (p.IdProducto == idSel)
+    {
+        <option value="@p.IdProducto" selected>@p.Nombre (@p.Sku)</option>
+    }
+    else
+    {
+        <option value="@p.IdProducto">@p.Nombre (@p.Sku)</option>
+    }
+}
+
+      </select>
+    </td>
+    <td><span class="badge bg-secondary stock-badge" data-cant="0">0</span></td>
+    <td>
+      <input name="Items[@i].Cantidad" class="form-control qty-input"
+             type="number" min="1" value="@(Model.Items[i].Cantidad <= 0 ? 1 : Model.Items[i].Cantidad)" />
+    </td>
+    <td class="text-center">
+      <button type="button" class="btn btn-sm btn-outline-danger btnDel">Quitar</button>
+    </td>
+  </tr>
+}
+    </tbody>
+  </table>
+
+  <div>
+    <button type="submit" class="btn btn-dark">Ejecutar transferencia</button>
+    <a asp-action="Index" class="btn btn-outline-secondary ms-2">Cancelar</a>
+  </div>
+</form>
+
+@section Scripts{
+<script>
+(function(){
+  const tbody = document.querySelector('#tablaItems tbody');
+  const btnAdd = document.getElementById('btnAdd');
+  const almacenOrigen = document.getElementById('almacenOrigen');
+  const almacenDestino= document.getElementById('almacenDestino');
+  const form  = document.getElementById('formTransfer');
+
+  function productosOptionsHtml(){
+    const first = tbody.querySelector('select.prod-select');
+    if (first){
+      return Array.from(first.options)
+        .map(o => `<option value="${o.value}" ${o.selected?'selected':''}>${o.text}</option>`).join('');
+    }
+    return `<option value="">-- Seleccione --</option>`;
+  }
+
+  function reindex(){
+    Array.from(tbody.querySelectorAll('tr')).forEach((tr,i)=>{
+      tr.querySelector('select.prod-select').name = `Items[${i}].IdProducto`;
+      tr.querySelector('.qty-input').name         = `Items[${i}].Cantidad`;
+    });
+  }
+
+  function nuevaFila(){
+    const idx = tbody.querySelectorAll('tr').length;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <select name="Items[${idx}].IdProducto" class="form-select prod-select">
+          ${productosOptionsHtml()}
+        </select>
+      </td>
+      <td><span class="badge bg-secondary stock-badge" data-cant="0">0</span></td>
+      <td><input name="Items[${idx}].Cantidad" class="form-control qty-input" type="number" min="1" value="1" /></td>
+      <td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger btnDel">Quitar</button></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  async function refrescarStock(tr){
+    const idAlm = almacenOrigen.value;
+    const sel = tr.querySelector('select.prod-select');
+    const badge = tr.querySelector('.stock-badge');
+    const qty   = tr.querySelector('.qty-input');
+    if (!idAlm || !sel.value){ badge.textContent='0'; badge.dataset.cant='0'; qty.removeAttribute('max'); return; }
+    try{
+      const r = await fetch(`/Admin/Stock/StockDisponible?idAlmacen=${idAlm}&idProducto=${sel.value}`,{headers:{'Accept':'application/json'}});
+      const j = await r.json();
+      const cant = j?.cantidad ?? 0;
+      badge.textContent = cant; badge.dataset.cant = cant; qty.max = cant;
+    }catch{}
+  }
+
+  function hayDuplicados(){
+    const vals = Array.from(tbody.querySelectorAll('select.prod-select'))
+      .map(s=>s.value).filter(v=>v);
+    return new Set(vals).size !== vals.length;
+  }
+
+  btnAdd.addEventListener('click', nuevaFila);
+
+  tbody.addEventListener('click', e=>{
+    if (e.target.classList.contains('btnDel')){ e.target.closest('tr').remove(); reindex(); }
+  });
+
+  tbody.addEventListener('change', e=>{
+    if (e.target.classList.contains('prod-select')){
+      const val = e.target.value;
+      if (val){
+        const count = Array.from(tbody.querySelectorAll('select.prod-select'))
+          .filter(s=>s.value===val).length;
+        if (count > 1){ alert('Ese producto ya está en la lista.'); e.target.value=""; return; }
+      }
+      refrescarStock(e.target.closest('tr'));
+    }
+  });
+
+  almacenOrigen.addEventListener('change', ()=> {
+    Array.from(tbody.querySelectorAll('tr')).forEach(refrescarStock);
+  });
+
+  form.addEventListener('submit', e=>{
+    if (!almacenOrigen.value || !almacenDestino.value){
+      e.preventDefault(); alert('Selecciona almacén origen y destino.'); return;
+    }
+    if (almacenOrigen.value === almacenDestino.value){
+      e.preventDefault(); alert('Origen y destino no pueden ser iguales.'); return;
+    }
+    if (hayDuplicados()){
+      e.preventDefault(); alert('No se permiten productos repetidos.'); return;
+    }
+    for (const tr of Array.from(tbody.querySelectorAll('tr'))){
+      const idProd = tr.querySelector('.prod-select').value;
+      if (!idProd) continue;
+      const max = parseInt(tr.querySelector('.stock-badge').dataset.cant || "0", 10);
+      const qty = parseInt(tr.querySelector('.qty-input').value || "0", 10);
+      if (qty > max){ e.preventDefault(); alert('Hay cantidades que exceden el stock disponible.'); return; }
+    }
+  });
+
+  Array.from(tbody.querySelectorAll('tr')).forEach(refrescarStock);
+})();
+</script>
+}

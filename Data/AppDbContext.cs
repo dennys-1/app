@@ -52,16 +52,15 @@ public class AppDbContext : IdentityDbContext<IdentityUser>
         mb.Entity<Categoria>().Property(x => x.Nombre).HasColumnName("nombre");
 
         mb.Entity<Producto>().ToTable("producto").HasKey(x => x.IdProducto);
-        mb.Entity<Producto>().Property(x => x.IdProducto).HasColumnName("id_producto");
-        mb.Entity<Producto>().Property(x => x.Sku).HasColumnName("sku");
-        mb.Entity<Producto>().Property(x => x.Nombre).HasColumnName("nombre");
-        mb.Entity<Producto>().Property(x => x.IdMarca).HasColumnName("id_marca");
-        mb.Entity<Producto>().Property(x => x.IdCategoria).HasColumnName("id_categoria");
-        mb.Entity<Producto>().Property(x => x.Descripcion).HasColumnName("descripcion");
-        mb.Entity<Producto>().Property(x => x.Precio).HasColumnName("precio");
-        mb.Entity<Producto>().Property(x => x.Costo).HasColumnName("costo");
-        mb.Entity<Producto>().Property(x => x.Activo).HasColumnName("activo");
-        mb.Entity<Producto>().Property(x => x.Especificaciones).HasColumnName("especificaciones");
+mb.Entity<Producto>().Property(x => x.IdProducto).HasColumnName("id_producto");
+mb.Entity<Producto>().Property(x => x.Sku).HasColumnName("sku");
+mb.Entity<Producto>().Property(x => x.Nombre).HasColumnName("nombre");
+mb.Entity<Producto>().Property(x => x.IdMarca).HasColumnName("id_marca");
+mb.Entity<Producto>().Property(x => x.IdCategoria).HasColumnName("id_categoria");
+mb.Entity<Producto>().Property(x => x.Descripcion).HasColumnName("descripcion");
+mb.Entity<Producto>().Property(x => x.Precio).HasColumnName("precio");
+mb.Entity<Producto>().Property(x => x.Costo).HasColumnName("costo");
+mb.Entity<Producto>().Property(x => x.Activo).HasColumnName("activo");
 
         mb.Entity<ImagenProducto>().ToTable("imagen_producto").HasKey(x => x.IdImagen);
         mb.Entity<ImagenProducto>().Property(x => x.IdImagen).HasColumnName("id_imagen");
@@ -179,6 +178,13 @@ mb.Entity<Pedido>(entity =>
         .WithOne()
         .HasForeignKey(ip => ip.IdPedido)
         .HasConstraintName("fk_item_pedido_pedido");
+        entity.Property<string>("referencia_pago").HasColumnName("referencia_pago");
+entity.Property<DateTimeOffset?>("pagado_en").HasColumnName("pagado_en");
+
+entity.Property<string>("courier").HasColumnName("courier");
+entity.Property<string>("tracking").HasColumnName("tracking");
+entity.Property<DateTimeOffset?>("enviado_en").HasColumnName("enviado_en");
+
 });
 
 // ==========================
@@ -215,7 +221,10 @@ mb.Entity<ItemPedido>(entity =>
         .ValueGeneratedOnAddOrUpdate();
 });
 
-
+mb.Entity<Producto>().Property(x => x.Especificaciones)
+    .HasColumnName("especificaciones")
+    .HasColumnType("jsonb")
+    .HasDefaultValueSql("'{}'::jsonb");
         mb.Entity<Proveedor>().ToTable("proveedor").HasKey(x => x.IdProveedor);
         mb.Entity<Proveedor>().Property(x => x.IdProveedor).HasColumnName("id_proveedor");
         mb.Entity<Proveedor>().Property(x => x.Ruc).HasColumnName("ruc");

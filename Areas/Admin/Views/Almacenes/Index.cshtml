@@ -1,0 +1,52 @@
+@model List<TiendaPc.Models.Almacen>
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Almacenes";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="mb-0">Almacenes</h3>
+    <a class="btn btn-dark" asp-action="Create">Nuevo almacén</a>
+</div>
+
+@if (TempData["msg"] is string m)
+{
+    <div class="alert alert-success">@m</div>
+}
+
+<div class="table-responsive">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Dirección</th>
+                <th>Activo</th>
+                <th style="width:160px"></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var a in Model)
+        {
+            <tr>
+                <td>@a.IdAlmacen</td>
+                <td>@a.Nombre</td>
+                <td>@a.Direccion</td>
+                <td>
+                    @if (a.Activo)
+                    { <span class="badge text-bg-success">Sí</span> }
+                    else
+                    { <span class="badge text-bg-secondary">No</span> }
+                </td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@a.IdAlmacen">Editar</a>
+                    <form method="post" asp-action="Delete" asp-route-id="@a.IdAlmacen" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar almacén?');">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

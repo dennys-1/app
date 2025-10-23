@@ -1,0 +1,37 @@
+@model TiendaPc.Models.Almacen
+@{
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Nuevo almacén";
+}
+
+<h3>Nuevo almacén</h3>
+<hr />
+
+<form method="post">
+    @Html.AntiForgeryToken()
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Nombre</label>
+            <input asp-for="Nombre" class="form-control" />
+            <span class="text-danger" asp-validation-for="Nombre"></span>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Dirección</label>
+            <input asp-for="Direccion" class="form-control" />
+            <span class="text-danger" asp-validation-for="Direccion"></span>
+        </div>
+        <div class="col-md-3 form-check mt-2">
+            <input asp-for="Activo" class="form-check-input" />
+            <label class="form-check-label">Activo</label>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-dark" type="submit">Guardar</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Volver</a>
+    </div>
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

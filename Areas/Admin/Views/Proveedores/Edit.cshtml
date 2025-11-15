@@ -1,16 +1,16 @@
 @model TiendaPc.Models.Proveedor
 @{
-  Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
-  ViewData["Title"] = "Editar proveedor";
+    ViewData["Title"] = "Editar proveedor";
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
-<h3>Editar proveedor</h3>
 
-<form asp-action="Edit" method="post" class="mt-3">
-  @Html.AntiForgeryToken()
-  <input type="hidden" asp-for="IdProveedor" />
-  <partial name="_Form" model="Model" />
-  <div class="mt-3">
-    <button class="btn btn-dark">Guardar cambios</button>
-    <a asp-action="Index" class="btn btn-outline-secondary ms-2">Volver</a>
-  </div>
+<h3 class="mb-3">Editar proveedor</h3>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="IdProveedor" />
+    <partial name="_Form" model="Model" />
+    <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        <a asp-action="Index" class="btn btn-secondary">Volver</a>
+    </div>
 </form>

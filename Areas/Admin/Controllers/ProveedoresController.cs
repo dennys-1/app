@@ -1,3 +1,4 @@
+// Areas/Admin/Controllers/ProveedoresController.cs
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,84 +13,97 @@ namespace TiendaPc.Areas.Admin.Controllers;
 public class ProveedoresController : Controller
 {
     private readonly AppDbContext _db;
-    private readonly ISunatService _sunat;
 
-    public ProveedoresController(AppDbContext db, ISunatService sunat)
+    public ProveedoresController(AppDbContext db)
     {
         _db = db;
-        _sunat = sunat;
+    }
+
+    // DEBUG: /Admin/Proveedores/Ping
+    [HttpGet]
+    public async Task<IActionResult> Ping()
+    {
+        try
+        {
+            var ok = await _db.Database.CanConnectAsync();
+            var count = await _db.Proveedores.CountAsync();
+            return Content($"DB:{ok} Proveedores:{count}");
+        }
+        catch (Exception ex)
+        {
+            return Content("PING ERROR -> " + ex.Message + "\n" + ex.StackTrace);
+        }
     }
 
     // GET: /Admin/Proveedores
-    // Filtros: q (ruc/razón/telefono/email) y activos (true/false/null)
     public async Task<IActionResult> Index(string? q, bool? activos)
     {
-        var query = _db.Proveedores.AsQueryable();
-
-        if (!string.IsNullOrWhiteSpace(q))
+        try
         {
-            q = q.Trim();
-            query = query.Where(p =>
-                p.Ruc.Contains(q) ||
-                p.RazonSocial.Contains(q) ||
-                (p.Telefono ?? "").Contains(q) ||
-                (p.Email ?? "").Contains(q));
+            var query = _db.Proveedores.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                q = q.Trim();
+                query = query.Where(p =>
+                    (p.Ruc ?? "").Contains(q) ||
+                    (p.RazonSocial ?? "").Contains(q) ||
+                    (p.Telefono ?? "").Contains(q) ||
+                    (p.Email ?? "").Contains(q));
+            }
+
+            if (activos.HasValue)
+                query = query.Where(p => p.Activo == activos.Value);
+
+            var lista = await query.OrderBy(p => p.RazonSocial).ToListAsync();
+            return View(lista);
         }
-
-        if (activos.HasValue)
-            query = query.Where(p => p.Activo == activos.Value);
-
-        var list = await query
-            .OrderBy(p => p.RazonSocial)
-            .ToListAsync();
-
-        ViewBag.Q = q;
-        ViewBag.Activos = activos;
-
-        return View(list);
+        catch (Exception ex)
+        {
+            // Para ver el error en pantalla mientras depuras
+            ViewData["IndexError"] = ex.ToString();
+            return View(new List<Proveedor>());
+        }
     }
 
     // GET: /Admin/Proveedores/Details/5
     public async Task<IActionResult> Details(int id)
     {
-        var p = await _db.Proveedores.FindAsync(id);
-        if (p == null) return NotFound();
-        return View(p);
+        var prov = await _db.Proveedores.FirstOrDefaultAsync(p => p.IdProveedor == id);
+        if (prov == null) return NotFound();
+        return View(prov);
     }
 
     // GET: /Admin/Proveedores/Create
-    public IActionResult Create()
-    {
-        return View(new Proveedor { Activo = true });
-    }
+    public IActionResult Create() => View(new Proveedor { Activo = true });
 
     // POST: /Admin/Proveedores/Create
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Proveedor model)
     {
-        // validación básica de RUC único
+        if (!ModelState.IsValid) return View(model);
+
         if (!string.IsNullOrWhiteSpace(model.Ruc))
         {
-            bool yaExiste = await _db.Proveedores.AnyAsync(p => p.Ruc == model.Ruc);
-            if (yaExiste)
+            var existe = await _db.Proveedores.AnyAsync(p => p.Ruc == model.Ruc);
+            if (existe)
+            {
                 ModelState.AddModelError(nameof(model.Ruc), "Ya existe un proveedor con ese RUC.");
+                return View(model);
+            }
         }
-
-        if (!ModelState.IsValid)
-            return View(model);
 
         _db.Proveedores.Add(model);
         await _db.SaveChangesAsync();
-        TempData["msg"] = "Proveedor creado.";
         return RedirectToAction(nameof(Index));
     }
 
     // GET: /Admin/Proveedores/Edit/5
     public async Task<IActionResult> Edit(int id)
     {
-        var p = await _db.Proveedores.FindAsync(id);
-        if (p == null) return NotFound();
-        return View(p);
+        var prov = await _db.Proveedores.FindAsync(id);
+        if (prov == null) return NotFound();
+        return View(prov);
     }
 
     // POST: /Admin/Proveedores/Edit/5
@@ -97,65 +111,59 @@ public class ProveedoresController : Controller
     public async Task<IActionResult> Edit(int id, Proveedor model)
     {
         if (id != model.IdProveedor) return BadRequest();
+        if (!ModelState.IsValid) return View(model);
 
-        // RUC único (excluyendo el mismo id)
+        var prov = await _db.Proveedores.FindAsync(id);
+        if (prov == null) return NotFound();
+
         if (!string.IsNullOrWhiteSpace(model.Ruc))
         {
-            bool yaExiste = await _db.Proveedores
-                .AnyAsync(p => p.IdProveedor != id && p.Ruc == model.Ruc);
-            if (yaExiste)
-                ModelState.AddModelError(nameof(model.Ruc), "Ya existe un proveedor con ese RUC.");
+            var duplicado = await _db.Proveedores.AnyAsync(p => p.IdProveedor != id && p.Ruc == model.Ruc);
+            if (duplicado)
+            {
+                ModelState.AddModelError(nameof(model.Ruc), "Otro proveedor ya usa ese RUC.");
+                return View(model);
+            }
         }
 
-        if (!ModelState.IsValid)
-            return View(model);
+        prov.Ruc = model.Ruc?.Trim();
+        prov.RazonSocial = model.RazonSocial?.Trim();
+        prov.Direccion = model.Direccion?.Trim();
+        prov.Telefono = model.Telefono?.Trim();
+        prov.Email = model.Email?.Trim();
+        prov.Activo = model.Activo;
 
-        try
-        {
-            _db.Proveedores.Update(model);
-            await _db.SaveChangesAsync();
-            TempData["msg"] = "Proveedor actualizado.";
-            return RedirectToAction(nameof(Index));
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!await _db.Proveedores.AnyAsync(p => p.IdProveedor == id))
-                return NotFound();
-            throw;
-        }
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
     }
 
     // POST: /Admin/Proveedores/Delete/5
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
-        var p = await _db.Proveedores.FindAsync(id);
-        if (p == null) return NotFound();
-
-        _db.Proveedores.Remove(p);
-        await _db.SaveChangesAsync();
-        TempData["msg"] = "Proveedor eliminado.";
+        var prov = await _db.Proveedores.FindAsync(id);
+        if (prov != null)
+        {
+            _db.Proveedores.Remove(prov);
+            await _db.SaveChangesAsync();
+        }
         return RedirectToAction(nameof(Index));
     }
 
-    // ========= API auxiliar =========
-    // GET: /Admin/Proveedores/BuscarRuc?ruc=XXXXXXXXXXX
+    // AJAX: usa ISunatService sólo aquí, inyectado por acción
+    // /Admin/Proveedores/ConsultaSunat?ruc=XXXXXXXXXXX
     [HttpGet]
-    public async Task<IActionResult> BuscarRuc(string ruc)
+    public async Task<IActionResult> ConsultaSunat(string ruc, [FromServices] ISunatService sunat)
     {
-        if (string.IsNullOrWhiteSpace(ruc) || ruc.Length < 8)
-            return BadRequest(new { error = "RUC/DNI inválido." });
-
-        var data = await _sunat.BuscarRucAsync(ruc);
-        if (data == null)
-            return NotFound(new { error = "No encontrado." });
-
-        return Json(new
+        try
         {
-            ruc = data.Ruc,
-            razonSocial = data.RazonSocial,
-            direccion = data.Direccion,
-            estado = data.Estado
-        });
+            var info = await sunat.ConsultarPorRucAsync(ruc);
+            if (info == null) return Json(new { ok = false, message = "RUC inválido o no encontrado." });
+            return Json(new { ok = true, data = info });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { ok = false, message = ex.Message });
+        }
     }
 }

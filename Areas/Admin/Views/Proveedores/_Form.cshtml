@@ -1,73 +1,84 @@
 @model TiendaPc.Models.Proveedor
-
-<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+@{
+    var isEdit = Model?.IdProveedor > 0;
+}
 
 <div class="row g-3">
-  <div class="col-md-4">
-    <label asp-for="Ruc" class="form-label"></label>
-    <div class="input-group">
-      <input asp-for="Ruc" class="form-control" />
-      <button type="button" id="btnBuscarRuc" class="btn btn-outline-secondary">Buscar</button>
+    <div class="col-md-4">
+        <label asp-for="Ruc" class="form-label">RUC</label>
+        <div class="input-group">
+            <input asp-for="Ruc" class="form-control" maxlength="11" id="Ruc" />
+            <button type="button" id="btnSunat" class="btn btn-outline-secondary">Consultar SUNAT</button>
+        </div>
+        <span asp-validation-for="Ruc" class="text-danger"></span>
     </div>
-    <span asp-validation-for="Ruc" class="text-danger"></span>
-  </div>
 
-  <div class="col-md-8">
-    <label asp-for="RazonSocial" class="form-label"></label>
-    <input asp-for="RazonSocial" class="form-control" />
-    <span asp-validation-for="RazonSocial" class="text-danger"></span>
-  </div>
-
-  <div class="col-md-6">
-    <label asp-for="Contacto" class="form-label"></label>
-    <input asp-for="Contacto" class="form-control" />
-    <span asp-validation-for="Contacto" class="text-danger"></span>
-  </div>
-
-  <div class="col-md-3">
-    <label asp-for="Telefono" class="form-label"></label>
-    <input asp-for="Telefono" class="form-control" />
-    <span asp-validation-for="Telefono" class="text-danger"></span>
-  </div>
-
-  <div class="col-md-3">
-    <label asp-for="Email" class="form-label"></label>
-    <input asp-for="Email" class="form-control" />
-    <span asp-validation-for="Email" class="text-danger"></span>
-  </div>
-
-  <div class="col-md-12">
-    <label asp-for="Direccion" class="form-label"></label>
-    <input asp-for="Direccion" class="form-control" />
-    <span asp-validation-for="Direccion" class="text-danger"></span>
-  </div>
-
-  <div class="col-md-3">
-    <div class="form-check mt-2">
-      <input class="form-check-input" asp-for="Activo" />
-      <label class="form-check-label" asp-for="Activo"></label>
+    <div class="col-md-8">
+        <label asp-for="RazonSocial" class="form-label">Razón social</label>
+        <input asp-for="RazonSocial" class="form-control" id="RazonSocial" />
+        <span asp-validation-for="RazonSocial" class="text-danger"></span>
     </div>
-  </div>
+
+    <div class="col-md-8">
+        <label asp-for="Direccion" class="form-label">Dirección</label>
+        <input asp-for="Direccion" class="form-control" id="Direccion" />
+        <span asp-validation-for="Direccion" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label asp-for="Telefono" class="form-label">Teléfono</label>
+        <input asp-for="Telefono" class="form-control" />
+        <span asp-validation-for="Telefono" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="Email" class="form-label">Email</label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-2 d-flex align-items-end">
+        <div class="form-check">
+            <input class="form-check-input" asp-for="Activo" />
+            <label class="form-check-label" asp-for="Activo">Activo</label>
+        </div>
+    </div>
 </div>
 
-@section Scripts{
-<script>
-document.getElementById('btnBuscarRuc')?.addEventListener('click', async () => {
-  const ruc = document.getElementById('Ruc').value?.trim();
-  if (!ruc) { alert('Ingresa un RUC/DNI'); return; }
-
-  try{
-    const url = `/Admin/Proveedores/BuscarRuc?ruc=${encodeURIComponent(ruc)}`;
-    const r = await fetch(url, { headers: { 'Accept':'application/json' }});
-    const j = await r.json();
-    if(!r.ok){ alert(j?.error ?? 'No encontrado'); return; }
-
-    // completa campos
-    if(j.razonSocial) document.getElementById('RazonSocial').value = j.razonSocial;
-    if(j.direccion)   document.getElementById('Direccion').value   = j.direccion;
-  }catch{
-    alert('No se pudo consultar el RUC en este momento.');
-  }
-});
-</script>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const btn = document.getElementById("btnSunat");
+            if (!btn) return;
+            btn.addEventListener("click", async function () {
+                const ruc = document.getElementById("Ruc").value.trim();
+                if (!/^\d{11}$/.test(ruc)) {
+                    alert("Ingresa un RUC válido de 11 dígitos.");
+                    return;
+                }
+                this.disabled = true;
+                this.textContent = "Consultando...";
+                try {
+                    const url = '@Url.Action("ConsultaSunat","Proveedores", new { area="Admin" })' + `?ruc=${encodeURIComponent(ruc)}`;
+                    const res = await fetch(url);
+                    const j = await res.json();
+                    if (!j.ok) {
+                        alert(j.message || "No se encontró información.");
+                    } else {
+                        const d = j.data || {};
+                        const rs = document.getElementById("RazonSocial");
+                        const di = document.getElementById("Direccion");
+                        if (d.razonSocial && (!rs.value || rs.value.length < 3)) rs.value = d.razonSocial;
+                        if (d.direccion && (!di.value || di.value.length < 3)) di.value = d.direccion;
+                    }
+                } catch (e) {
+                    alert("Error consultando SUNAT: " + e);
+                } finally {
+                    this.disabled = false;
+                    this.textContent = "Consultar SUNAT";
+                }
+            });
+        })();
+    </script>
 }

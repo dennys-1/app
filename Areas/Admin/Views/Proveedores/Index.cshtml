@@ -1,75 +1,64 @@
-@model List<TiendaPc.Models.Proveedor>
+@model IEnumerable<TiendaPc.Models.Proveedor>
 @{
-  Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
-  ViewData["Title"] = "Proveedores";
-
-  string q = ViewBag.Q as string ?? "";
-  bool? activos = ViewBag.Activos as bool?;
+    ViewData["Title"] = "Proveedores";
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<h3>Proveedores</h3>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Proveedores</h3>
+    <a asp-action="Create" class="btn btn-dark">Nuevo proveedor</a>
+</div>
 
-@if (TempData["msg"] != null) {
-  <div class="alert alert-success">@TempData["msg"]</div>
-}
-
-<form class="row g-2 mb-3">
-  <div class="col-md-5">
-    <input class="form-control" name="q" value="@q" placeholder="RUC, razón social, teléfono o correo" />
-  </div>
-  <div class="col-md-3">
-    <select name="activos" class="form-select">
-      <option value="">Todos</option>
-      <option value="true"  selected="@(activos == true)">Activos</option>
-      <option value="false" selected="@(activos == false)">Inactivos</option>
-    </select>
-  </div>
-  <div class="col-md-2">
-    <button class="btn btn-dark w-100">Filtrar</button>
-  </div>
-  <div class="col-md-2 text-md-end">
-    <a class="btn btn-primary w-100" asp-action="Create">Nuevo</a>
-  </div>
+<form method="get" class="row gy-2 gx-2 mb-3">
+    <div class="col-md-6">
+        <input type="text" name="q" value="@Context.Request.Query["q"]"
+               class="form-control" placeholder="Buscar por RUC, razón, teléfono o email" />
+    </div>
+    <div class="col-md-3">
+        <select name="activos" class="form-select">
+            <option value="">Todos</option>
+            <option value="true"  selected="@(Context.Request.Query["activos"]=="true")">Solo activos</option>
+            <option value="false" selected="@(Context.Request.Query["activos"]=="false")">Solo inactivos</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button class="btn btn-outline-secondary">Filtrar</button>
+    </div>
 </form>
 
-@if (Model == null || Model.Count == 0) {
-  <div class="alert alert-info">No se encontraron proveedores.</div>
-} else {
-<div class="table-responsive">
 <table class="table table-hover align-middle">
-  <thead>
-    <tr>
-      <th>RUC</th>
-      <th>Razón social</th>
-      <th>Contacto</th>
-      <th>Teléfono</th>
-      <th>Email</th>
-      <th>Estado</th>
-      <th style="width:210px"></th>
-    </tr>
-  </thead>
-  <tbody>
-  @foreach (var p in Model)
-  {
-    <tr>
-      <td>@p.Ruc</td>
-      <td>@p.RazonSocial</td>
-      <td>@p.Contacto</td>
-      <td>@p.Telefono</td>
-      <td>@p.Email</td>
-      <td>@(p.Activo ? "Activo" : "Inactivo")</td>
-      <td class="text-end">
-        <a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@p.IdProveedor">Ver</a>
-        <a class="btn btn-sm btn-outline-primary ms-1" asp-action="Edit" asp-route-id="@p.IdProveedor">Editar</a>
-        <form method="post" asp-action="Delete" asp-route-id="@p.IdProveedor" class="d-inline"
-              onsubmit="return confirm('¿Eliminar proveedor?');">
-          @Html.AntiForgeryToken()
-          <button class="btn btn-sm btn-outline-danger ms-1">Eliminar</button>
-        </form>
-      </td>
-    </tr>
-  }
-  </tbody>
+    <thead>
+        <tr>
+            <th>RUC</th>
+            <th>Razón social</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Activo</th>
+            <th style="width:160px"></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.Ruc</td>
+            <td>@p.RazonSocial</td>
+            <td>@p.Telefono</td>
+            <td>@p.Email</td>
+            <td>
+                @if (p.Activo)
+                { <span class="badge bg-success">Sí</span> }
+                else
+                { <span class="badge bg-secondary">No</span> }
+            </td>
+            <td class="text-end">
+                <a asp-action="Details" asp-route-id="@p.IdProveedor" class="btn btn-light btn-sm">Ver</a>
+                <a asp-action="Edit" asp-route-id="@p.IdProveedor" class="btn btn-secondary btn-sm">Editar</a>
+                <form asp-action="Delete" asp-route-id="@p.IdProveedor" method="post" class="d-inline">
+                    <button class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Eliminar proveedor?')">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
 </table>
-</div>
-}

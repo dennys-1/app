@@ -21,14 +21,15 @@
     </div>
 
     <div class="col-md-3">
-        <select class="form-select" name="estado">
-            <option value="" @(string.IsNullOrEmpty(estado) ? "selected=\"selected\"" : "")>Todos</option>
-            <option value="Emitida" @(estado == "Emitida" ? "selected=\"selected\"" : "")>Emitida</option>
-            <option value="Recibida Parcial" @(estado == "Recibida Parcial" ? "selected=\"selected\"" : "")>Recibida Parcial</option>
-            <option value="Completada" @(estado == "Completada" ? "selected=\"selected\"" : "")>Completada</option>
-            <option value="Anulada" @(estado == "Anulada" ? "selected=\"selected\"" : "")>Anulada</option>
-        </select>
-    </div>
+    <select class="form-select" name="estado">
+        <option value="" selected="@string.IsNullOrEmpty(estado)">Todos</option>
+        <option value="Emitida" selected="@(estado == "Emitida")">Emitida</option>
+        <option value="Recibida Parcial" selected="@(estado == "Recibida Parcial")">Recibida Parcial</option>
+        <option value="Completada" selected="@(estado == "Completada")">Completada</option>
+        <option value="Anulada" selected="@(estado == "Anulada")">Anulada</option>
+    </select>
+</div>
+
 
     <div class="col-md-2">
         <button class="btn btn-dark w-100">Filtrar</button>

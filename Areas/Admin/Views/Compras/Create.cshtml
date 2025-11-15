@@ -8,18 +8,20 @@
     var almacenes   = ViewBag.Almacenes   as IEnumerable<Almacen>   ?? Enumerable.Empty<Almacen>();
     var productos   = ViewBag.Productos   as IEnumerable<Producto>  ?? Enumerable.Empty<Producto>();
 
-    // siempre al menos una fila
+    // Siempre al menos una fila
     Model.Items ??= new();
-    if (Model.Items.Count == 0) Model.Items.Add(new TiendaPc.Areas.Admin.Controllers.ComprasController.CreateOcItemVm());
+    if (Model.Items.Count == 0)
+        Model.Items.Add(new TiendaPc.Areas.Admin.Controllers.ComprasController.CreateOcItemVm());
 }
 
 <h3 class="mb-3">Nueva Orden de Compra</h3>
 
 @if (!ViewData.ModelState.IsValid)
 {
-  <div class="alert alert-danger">
-    @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors)) { <div>@e.ErrorMessage</div> }
-  </div>
+    <div class="alert alert-danger">
+        @foreach (var e in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        { <div>@e.ErrorMessage</div> }
+    </div>
 }
 
 <form asp-action="Create" method="post" id="formOc">
@@ -31,7 +33,9 @@
             <select asp-for="IdProveedor" class="form-select">
                 <option value="">-- Seleccione --</option>
                 @foreach (var p in proveedores)
-                { <option value="@p.IdProveedor">@p.RazonSocial (@p.Ruc)</option> }
+                {
+                    <option value="@p.IdProveedor">@p.RazonSocial (@p.Ruc)</option>
+                }
             </select>
         </div>
         <div class="col-md-4">
@@ -39,7 +43,9 @@
             <select asp-for="IdAlmacen" class="form-select">
                 <option value="">-- Seleccione --</option>
                 @foreach (var a in almacenes)
-                { <option value="@a.IdAlmacen">@a.Nombre</option> }
+                {
+                    <option value="@a.IdAlmacen">@a.Nombre</option>
+                }
             </select>
         </div>
         <div class="col-md-2">
@@ -69,27 +75,47 @@
                 </tr>
             </thead>
             <tbody>
-@for (int i=0; i < Model.Items.Count; i++)
-{
-    var idSel = Model.Items[i].IdProducto;
-    <tr>
-        <td>
-            <select name="Items[@i].IdProducto" class="form-select prod-select">
-                <option value="">-- Seleccione --</option>
-                @foreach (var p in productos)
-                {
-                    <option value="@p.IdProducto" @(p.IdProducto==idSel?"selected":"")>
-                        @p.Nombre (@p.Sku)
-                    </option>
-                }
-            </select>
-        </td>
-        <td><input name="Items[@i].Cantidad" class="form-control qty-input" type="number" min="1" value="@(Model.Items[i].Cantidad<=0?1:Model.Items[i].Cantidad)" /></td>
-        <td><input name="Items[@i].PrecioUnitario" class="form-control price-input" type="number" min="0" step="0.01" value="@(Model.Items[i].PrecioUnitario<=0?0:Model.Items[i].PrecioUnitario)" /></td>
-        <td class="text-end fw-semibold item-total">0.00</td>
-        <td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger btnDel">X</button></td>
-    </tr>
-}
+            @for (int i = 0; i < Model.Items.Count; i++)
+            {
+                var idSel = Model.Items[i].IdProducto;
+                <tr>
+                    <td>
+                      <select name="Items[@i].IdProducto" class="form-select prod-select">
+    @foreach (var p in productos)
+    {
+        if (p.IdProducto == idSel)
+        {
+            @:<option value="@p.IdProducto" selected>@p.Nombre</option>
+        }
+        else
+        {
+            @:<option value="@p.IdProducto">@p.Nombre</option>
+        }
+    }
+</select>
+
+
+
+
+                    </td>
+                    <td>
+                        <input name="Items[@i].Cantidad"
+                               class="form-control qty-input"
+                               type="number" min="1"
+                               value="@(Model.Items[i].Cantidad <= 0 ? 1 : Model.Items[i].Cantidad)" />
+                    </td>
+                    <td>
+                        <input name="Items[@i].PrecioUnitario"
+                               class="form-control price-input"
+                               type="number" min="0" step="0.01"
+                               value="@(Model.Items[i].PrecioUnitario <= 0 ? 0 : Model.Items[i].PrecioUnitario)" />
+                    </td>
+                    <td class="text-end fw-semibold item-total">0.00</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-outline-danger btnDel">X</button>
+                    </td>
+                </tr>
+            }
             </tbody>
             <tfoot>
                 <tr>
@@ -117,7 +143,7 @@
     </div>
 </form>
 
-@section Scripts{
+@section Scripts {
 <script>
 (function(){
   const tbody = document.querySelector('#tablaItems tbody');
@@ -126,18 +152,21 @@
   function optionsHtml(){
     const first = tbody.querySelector('select.prod-select');
     if (!first) return `<option value="">-- Seleccione --</option>`;
-    return Array.from(first.options).map(o=>`<option value="${o.value}" ${o.selected?'selected':''}>${o.text}</option>`).join('');
+    return Array.from(first.options)
+      .map(o => `<option value="${o.value}" ${o.selected ? 'selected' : ''}>${o.text}</option>`)
+      .join('');
   }
 
   function rowTotal(tr){
     const q = parseFloat(tr.querySelector('.qty-input').value || '0');
     const p = parseFloat(tr.querySelector('.price-input').value || '0');
-    const tot = (q*p);
+    const tot = (q * p);
     tr.querySelector('.item-total').textContent = tot.toFixed(2);
     return tot;
   }
+
   function totals(){
-    let sub=0;
+    let sub = 0;
     Array.from(tbody.querySelectorAll('tr')).forEach(tr => sub += rowTotal(tr));
     const igv = +(sub * 0.18).toFixed(2);
     const tot = (sub + igv).toFixed(2);
@@ -147,7 +176,7 @@
   }
 
   function reindex(){
-    Array.from(tbody.querySelectorAll('tr')).forEach((tr,i)=>{
+    Array.from(tbody.querySelectorAll('tr')).forEach((tr, i) => {
       tr.querySelector('select.prod-select').name = `Items[${i}].IdProducto`;
       tr.querySelector('.qty-input').name = `Items[${i}].Cantidad`;
       tr.querySelector('.price-input').name = `Items[${i}].PrecioUnitario`;
@@ -169,12 +198,13 @@
 
   btnAdd.addEventListener('click', addRow);
 
-  tbody.addEventListener('input', e=>{
+  tbody.addEventListener('input', e => {
     if (e.target.classList.contains('qty-input') || e.target.classList.contains('price-input')){
       totals();
     }
   });
-  tbody.addEventListener('click', e=>{
+
+  tbody.addEventListener('click', e => {
     if (e.target.classList.contains('btnDel')){
       e.target.closest('tr').remove();
       reindex();

@@ -1,8 +1,14 @@
-namespace TiendaPc.Services;
-
-public record SunatRucDto(string? Ruc, string? RazonSocial, string? Direccion, string? Estado);
-
-public interface ISunatService
+namespace TiendaPc.Services
 {
-    Task<SunatRucDto?> BuscarRucAsync(string ruc, CancellationToken ct = default);
+    public class SunatInfoDto
+    {
+        public string? Ruc { get; set; }
+        public string? RazonSocial { get; set; }
+        public string? Direccion { get; set; }
+    }
+
+    public interface ISunatService
+    {
+        Task<SunatInfoDto?> ConsultarPorRucAsync(string ruc);
+    }
 }

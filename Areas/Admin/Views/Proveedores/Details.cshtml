@@ -1,26 +1,36 @@
 @model TiendaPc.Models.Proveedor
 @{
-  Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
-  ViewData["Title"] = "Proveedor";
+    ViewData["Title"] = "Detalle proveedor";
+    Layout = "/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
-<h3>Proveedor</h3>
 
-@if (TempData["msg"] != null) {
-  <div class="alert alert-success">@TempData["msg"]</div>
-}
+<h3 class="mb-3">Detalle del proveedor</h3>
 
 <div class="card">
-  <div class="card-body">
-    <dl class="row">
-      <dt class="col-sm-3">RUC</dt><dd class="col-sm-9">@Model.Ruc</dd>
-      <dt class="col-sm-3">Razón social</dt><dd class="col-sm-9">@Model.RazonSocial</dd>
-      <dt class="col-sm-3">Contacto</dt><dd class="col-sm-9">@Model.Contacto</dd>
-      <dt class="col-sm-3">Teléfono</dt><dd class="col-sm-9">@Model.Telefono</dd>
-      <dt class="col-sm-3">Email</dt><dd class="col-sm-9">@Model.Email</dd>
-      <dt class="col-sm-3">Dirección</dt><dd class="col-sm-9">@Model.Direccion</dd>
-      <dt class="col-sm-3">Activo</dt><dd class="col-sm-9">@((Model.Activo) ? "Sí" : "No")</dd>
-    </dl>
-    <a asp-action="Edit" asp-route-id="@Model.IdProveedor" class="btn btn-primary">Editar</a>
-    <a asp-action="Index" class="btn btn-outline-secondary ms-2">Volver</a>
-  </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">RUC</dt>
+            <dd class="col-sm-9">@Model.Ruc</dd>
+
+            <dt class="col-sm-3">Razón social</dt>
+            <dd class="col-sm-9">@Model.RazonSocial</dd>
+
+            <dt class="col-sm-3">Dirección</dt>
+            <dd class="col-sm-9">@Model.Direccion</dd>
+
+            <dt class="col-sm-3">Teléfono</dt>
+            <dd class="col-sm-9">@Model.Telefono</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+
+            <dt class="col-sm-3">Activo</dt>
+            <dd class="col-sm-9">@(Model.Activo ? "Sí" : "No")</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.IdProveedor" class="btn btn-secondary">Editar</a>
+    <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
 </div>
